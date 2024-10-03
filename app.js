@@ -32,7 +32,7 @@ app.post("/fulfillAxios",async(req,res)=>{
 
 app.post("/encryptPassword",(req,res)=>{
   const details=req.body;
-  res.json(encrpytedPassword:CryptoJS.AES.encrypt(details.password, encryptionKey).toString())
+  res.json({encrpytedPassword:CryptoJS.AES.encrypt(details.password, encryptionKey).toString()})
 })
 
 app.listen(3000, () => {
