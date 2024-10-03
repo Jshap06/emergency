@@ -16,7 +16,7 @@ const app = express();
 
 app.post("/fulfillAxios",async(req,res)=>{
   const details=req.body;
-  response=await axios.post(details.url,details.xml,{headers: {
+  const response=await axios.post(details.url,details.xml,{headers: {
             'Content-Type': 'text/xml',
             "Cookie":"edupointkeyversion=pLbL29JuBFfT2HwPdgcQQmZQVePkoGBBVsLaB0ztBQC/jGmbFGAFzaaqIjVo1lxv;"
           }})
