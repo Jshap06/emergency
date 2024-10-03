@@ -4,7 +4,8 @@ const cors = require('cors');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
-app.use(cors()); // Enable CORS if needed
+app.options('*', cors());
+
 
 app.post("/fulfillAxios",async(req,res)=>{
   const details=req.body;
