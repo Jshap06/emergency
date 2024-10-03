@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const CryptoJS = require('crypto-js');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
