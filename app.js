@@ -29,7 +29,7 @@ app.post("/fulfillAxios",async(req,res)=>{
             "Cookie":"edupointkeyversion=pLbL29JuBFfT2HwPdgcQQmZQVePkoGBBVsLaB0ztBQC/jGmbFGAFzaaqIjVo1lxv;"
           }})
   res.json({status:true,response:response.data});
-  }catch(error){res.json({status:false,message:error.message})}})
+  }catch(error){console.log(error);res.json({status:false,message:error.message})}})
 
 app.post("/encryptPassword",(req,res)=>{
   const details=req.body;
