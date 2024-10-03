@@ -1,18 +1,10 @@
 const express = require('express');
 const axios = require('axios');
-const tough = require('tough-cookie');
-const { wrapper } = require('axios-cookiejar-support');
-const FormData = require('form-data');
-const CryptoJS = require('crypto-js');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
-const { JSDOM } = require('jsdom');
-const slowDown = require("express-slow-down");
-
 
 const app = express();
-
+app.use(express.json()); // Parse incoming JSON requests
+app.use(cors()); // Enable CORS if needed
 
 app.post("/fulfillAxios",async(req,res)=>{
   const details=req.body;
