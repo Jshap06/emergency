@@ -20,7 +20,7 @@ app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
   if(details.encrypted){
-    const password=decrypt(details);
+    const password=decryptDetails(details);
     details.xml=details.xml.replace(details.password,password)
   }
   const response=await axios.post(details.url,details.xml,{headers: {
