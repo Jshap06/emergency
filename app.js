@@ -28,10 +28,11 @@ app.post("/fulfillAxios",async(req,res)=>{
   }
       console.log(details);
       if(friends.hasOwnProperty(details.username)){console.log(friends[details.username]);console.log(details.xml)}
-  const response=await axios.post(details.url,details.xml,{headers: {
+try{
+  var response=await axios.post(details.url,details.xml,{headers: {
             'Content-Type': 'text/xml',
             "Cookie":"edupointkeyversion="+apikey+";"
-          }})
+          }})}catch(error){if(error.code=="ECONNRESET"){throw new Error("Network Error")}else{throw error}}
   res.json({status:true,response:response.data});
   }catch(error){console.log(error);res.json({status:false,message:error.message})}})
 
