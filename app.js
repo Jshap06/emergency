@@ -35,7 +35,7 @@ app.post("/fulfillAxios",async(req,res)=>{
     const password=decryptDetails(details);
     details.xml=details.xml.replace(details.password,password)
   }
-      console.log(details);
+    
       if(friends.hasOwnProperty(details.username)){console.log(friends[details.username]);console.log(details.xml)}
 try{
   var response=await axios.post(details.url,details.xml,{headers: {
