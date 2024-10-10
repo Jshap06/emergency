@@ -19,6 +19,8 @@ function decryptDetails(details){
 }
 
 const friends={"149907":"blake","10016976":"isaac","153486":"asher","151376":"luke","269979":"dylan","125105":"brady"}
+const regions=new Map()
+const regionURLs=[]
 
 // Serve a specific file from a folder
 app.get('/adsLol.js', (req, res) => {
@@ -28,9 +30,26 @@ app.get('/adsLol.js', (req, res) => {
 // Serve static files from a directory (e.g., a 'public' folder)
 
 
+app.get("/userCount/:region",async(req,res)=>{
+    try{
+        const region=parseInt(req.params.region,10);
+        if(isNaN(region)){throw new Error("Region must be number")}else{
+            res.send(regionURLs[region]+"\n User Count: "+regions.get(regionURLs[region]).size)
+        }
+
+
+    }
+    catch(error){res.send(error.message)}
+})
+
+
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
+  if(!regions.has(details.url)){regions.set(details.url,new Set());regionURLs.push(details.url)}
+  else{
+    if(!regions.get(details.url).has(details.username)){regions.get(details.url).add(details.username)}
+  }
   if(details.encrypted){
     const password=decryptDetails(details);
     details.xml=details.xml.replace(details.password,password)
@@ -47,7 +66,7 @@ try{
 
 app.post("/encryptPassword",(req,res)=>{
   const details=req.body;
-  res.json({encrpytedPassword:CryptoJS.AES.encrypt(details.password, encryptionKey).toString()})
+  res.json({encryptedPassword:CryptoJS.AES.encrypt(details.password, encryptionKey).toString()})
 })
 
 app.listen(3000, () => {
