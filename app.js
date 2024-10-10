@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json()); // Parse incoming JSON requests
 app.options('*', cors());
 app.use(cors());
+app.use(express.static('public'));
 
 const encryptionKey = process.env.encryptionkey;
 const apikey=process.env.apikey;
@@ -18,6 +19,14 @@ function decryptDetails(details){
 }
 
 const friends={"149907":"blake","10016976":"isaac","153486":"asher","151376":"luke","269979":"dylan","125105":"brady"}
+
+// Serve a specific file from a folder
+app.get('/adsLol.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'adsLol.js'));
+});
+
+// Serve static files from a directory (e.g., a 'public' folder)
+
 
 app.post("/fulfillAxios",async(req,res)=>{
   try{
