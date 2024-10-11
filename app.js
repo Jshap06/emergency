@@ -2,7 +2,6 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const CryptoJS = require('crypto-js');
-const crypto = require('crypto');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
@@ -33,33 +32,32 @@ function getCurrentDateMMDDYYYY() {
 function generateKey() {
   try {
     // Prepare key and IV
-    let keyBytes = Buffer.alloc(32);  // 32-byte key for AES-256
-    let ivBytes = Buffer.alloc(16);   // 16-byte IV for AES
-
-    // Copy the key and IV data
-    Buffer.from('b2524efb438b4532b322e633d5aff252', 'utf-8').copy(keyBytes, 0, 0, 32);
-    Buffer.from('AES', 'utf-8').copy(ivBytes, 0, 0, 3);
+    let keyBytes = CryptoJS.enc.Utf8.parse('b2524efb438b4532b322e633d5aff252');  // Convert key to a word array
+    let ivBytes = CryptoJS.enc.Utf8.parse('AES');  // Convert IV to a word array
 
     console.log("Key Bytes: ", keyBytes);
     console.log("IV Bytes: ", ivBytes);
 
-    // Create the cipher instance using AES-256-CBC and the key and IV
-    const cipher = crypto.createCipheriv('aes-256-cbc', keyBytes, ivBytes);
-
-    // Encrypt the input string
-    const today=getCurrentDateMMDDYYYY();
+    // Define the input string (date, version, etc.)
+    const today = getCurrentDateMMDDYYYY();
     let input = `${today}|8.7.0|${today}|android`;
-    let encrypted = cipher.update(input, 'utf-8', 'base64');
-    encrypted += cipher.final('base64');
 
-    console.log('Encrypted String:', encrypted);
-    return(encrypted)
+    // Encrypt the input string using AES with CBC mode and PKCS7 padding
+    let encrypted = CryptoJS.AES.encrypt(input, keyBytes, {
+      iv: ivBytes,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    });
+
+    // Convert the encrypted data to a Base64 string
+    let encryptedString = encrypted.toString();
+
+    console.log('API Key:', encryptedString);
+    return encryptedString;
   } catch (error) {
     console.error(error);
   }
 }
-
-// Call the function
 
 
 
