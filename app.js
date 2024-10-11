@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const CryptoJS = require('crypto-js');
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
@@ -10,7 +11,7 @@ app.use(cors());
 app.use(express.static('public'));
 
 const encryptionKey = process.env.encryptionkey;
-const apikey=process.env.apikey;
+var apikey=generateKey();
 
 function decryptDetails(details){
     const bytes = CryptoJS.AES.decrypt(details.password, encryptionKey);
@@ -18,16 +19,58 @@ function decryptDetails(details){
     return(originalText)
 }
 
+function getCurrentDateMMDDYYYY() {
+    const date = new Date();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so +1
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${month}${day}${year}`;
+}
+
+
+
+function generateKey() {
+  try {
+    // Prepare key and IV
+    let keyBytes = Buffer.alloc(32);  // 32-byte key for AES-256
+    let ivBytes = Buffer.alloc(16);   // 16-byte IV for AES
+
+    // Copy the key and IV data
+    Buffer.from('b2524efb438b4532b322e633d5aff252', 'utf-8').copy(keyBytes, 0, 0, 32);
+    Buffer.from('AES', 'utf-8').copy(ivBytes, 0, 0, 3);
+
+    console.log("Key Bytes: ", keyBytes);
+    console.log("IV Bytes: ", ivBytes);
+
+    // Create the cipher instance using AES-256-CBC and the key and IV
+    const cipher = crypto.createCipheriv('aes-256-cbc', keyBytes, ivBytes);
+
+    // Encrypt the input string
+    const today=getCurrentDateMMDDYYYY();
+    let input = `${today}|8.7.0|${today}|android`;
+    let encrypted = cipher.update(input, 'utf-8', 'base64');
+    encrypted += cipher.final('base64');
+
+    console.log('Encrypted String:', encrypted);
+    return(encrypted)
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Call the function
+
+
+
 const friends={"149907":"blake","10016976":"isaac","153486":"asher","151376":"luke","269979":"dylan","125105":"brady"}
 const regions=new Map()
 const regionURLs=[]
 
-// Serve a specific file from a folder
-app.get('/adsLol.js', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'adsLol.js'));
-});
 
-// Serve static files from a directory (e.g., a 'public' folder)
+setInterval(()=>{
+    apikey=generateKey();
+},86400000);
 
 
 app.get("/userCount/:region",async(req,res)=>{
