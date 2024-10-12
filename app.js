@@ -93,7 +93,7 @@ app.post("/fulfillAxios",async(req,res)=>{
   }
   if(details.encrypted){
     const password=decryptDetails(details);
-    details.xml=details.xml.replace(details.password,password)
+    details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+password+"</password>")
   }
       if(friends.hasOwnProperty(details.username)){console.log(friends[details.username]);console.log(details.xml)}
 try{
