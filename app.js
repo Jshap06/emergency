@@ -5,8 +5,8 @@ const CryptoJS = require('crypto-js');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
-app.options('*', cors());
-app.use(cors());
+app.options('*', cors({origin:"https://grademelon.org"}));
+app.use(cors({origin:"https://grademelon.org"}));
 app.use(express.static('public'));
 
 const encryptionKey = process.env.encryptionkey;
