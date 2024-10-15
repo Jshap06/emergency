@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const CryptoJS = require('crypto-js');
+const xmlEscape = require('xml-escape');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
@@ -93,7 +94,7 @@ app.post("/fulfillAxios",async(req,res)=>{
   }
   if(details.encrypted){
     const password=decryptDetails(details);
-    details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+password+"</password>")
+    details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+xmlEscape(password)+"</password>")
   }
       if(friends.hasOwnProperty(details.username)){console.log(friends[details.username]);console.log(details.xml)}
 try{
