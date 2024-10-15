@@ -6,8 +6,8 @@ const xmlEscape = require('xml-escape');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
-app.options('*', cors({origin:"https://grademelon.org"}));
-app.use(cors({origin:"https://grademelon.org"}));
+app.options('*', cors()); //{origin:"https://grademelon.org"}
+app.use(cors());
 app.use(express.static('public'));
 
 const encryptionKey = process.env.encryptionkey;
