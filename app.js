@@ -62,7 +62,7 @@ function generateKey() {
 
 
 
-const friends={"149907":"blake","10016976":"isaac","153486":"asher","151376":"luke","269979":"dylan","125105":"brady"}
+const friends={"149907":"blake","153486":"asher","151376":"luke","269979":"dylan","125105":"brady"}
 const regions=new Map()
 const regionURLs=[]
 
