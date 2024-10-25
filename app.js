@@ -62,9 +62,8 @@ function generateKey() {
 
 
 
-const friends={"149907":"blake","153486":"asher","151376":"luke","269979":"dylan","125105":"brady"}
-const regions=new Map()
-const regionURLs=[]
+const regions=new Map();
+const regionURLs=[];
 
 
 setInterval(()=>{
@@ -96,7 +95,6 @@ app.post("/fulfillAxios",async(req,res)=>{
     const password=decryptDetails(details);
     details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+xmlEscape(password)+"</password>")
   }
-      if(friends.hasOwnProperty(details.username)){console.log(friends[details.username]);console.log(details.xml)}
 try{
   var response=await axios.post(details.url,details.xml,{headers: {
             'Content-Type': 'text/xml',
@@ -106,7 +104,7 @@ try{
             "Cookie":"edupointkeyversion="+apikey+";"
           }})}
   res.json({status:true,response:response.data});
-  }catch(error){console.log(error);res.json({status:false,message:error.message})}})
+  }catch(error){console.log(error.replace(/<password>.*?<\/password>/,"<password>redacted</password>"));res.json({status:false,message:error.message})}})
 
 app.post("/encryptPassword",(req,res)=>{
   const details=req.body;
