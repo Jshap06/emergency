@@ -61,7 +61,7 @@ function generateKey() {
 }
 
 function sanitizeError(error) {
-  const { message, stack, name } = error; // Only select essential properties
+  var { message, stack, name } = error; // Only select essential properties
   message=message.replace(/<password>.*?<\/password>/,"<password>redacted</password>");
   stack=stack.replace(/<password>.*?<\/password>/,"<password>redacted</password>");
   name=name.replace(/<password>.*?<\/password>/,"<password>redacted</password>");
