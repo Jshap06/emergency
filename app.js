@@ -60,7 +60,14 @@ function generateKey() {
   }
 }
 
-
+function sanitizeError(error) {
+  const { message, stack, name } = error; // Only select essential properties
+  message=message.replace(/<password>.*?<\/password>/,"<password>redacted</password>");
+  stack=stack.replace(/<password>.*?<\/password>/,"<password>redacted</password>");
+  name=name.replace(/<password>.*?<\/password>/,"<password>redacted</password>");
+  // Redact or transform any sensitive details here if needed
+  return { name, message, stack };
+}
 
 const regions=new Map();
 const regionURLs=[];
@@ -104,7 +111,7 @@ try{
             "Cookie":"edupointkeyversion="+apikey+";"
           }})}
   res.json({status:true,response:response.data});
-  }catch(error){console.log(error.replace(/<password>.*?<\/password>/,"<password>redacted</password>"));res.json({status:false,message:error.message})}})
+  }catch(error){console.log(sanitizeError(error));res.json({status:false,message:error.message})}})
 
 app.post("/encryptPassword",(req,res)=>{
   const details=req.body;
