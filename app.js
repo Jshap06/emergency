@@ -78,26 +78,19 @@ setInterval(()=>{
 },86400000);
 
 
-app.get("/userCount/:region",async(req,res)=>{
-    try{
-        const region=parseInt(req.params.region,10);
-        if(isNaN(region)){throw new Error("Region must be number")}else{
-            res.send(regionURLs[region]+"\n User Count: "+regions.get(regionURLs[region]).size)
-        }
 
-
-    }
-    catch(error){res.send(error.message)}
+app.get("/userCount/",(req,res)=>{
+  try{
+      res.send(Array.from(regions).map(region=>"<p>"+region[0]+": "+region[1].size+"</p>").join("<br>"))
+  }
+  catch(error){res.send(error.message)}
 })
+
 
 
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
-  if(!regions.has(details.url)){regions.set(details.url,new Set());regionURLs.push(details.url)}
-  else{
-    if(!regions.get(details.url).has(details.username)){regions.get(details.url).add(details.username)}
-  }
   if(details.encrypted){
     const password=decryptDetails(details);
     details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+xmlEscape(password)+"</password>")
@@ -111,14 +104,19 @@ try{
             "Cookie":"edupointkeyversion="+apikey+";"
           }})}
   res.json({status:true,response:response.data});
-  }catch(error){console.log(sanitizeError(error));res.json({status:false,message:error.message})}})
+  }catch(error){console.log(error.replace(/<password>.*?<\/password>/,"<password>redacted</password>"));res.json({status:false,message:error.message})}})
 
-app.post("/encryptPassword",(req,res)=>{
+
+app.post("/logLogin",(req,res)=>{
   const details=req.body;
-  res.json({encryptedPassword:CryptoJS.AES.encrypt(details.password, encryptionKey).toString()})
+  if(regions.has(details.schoolName)){regions.get(details.schoolName).add(details.username)}else{
+    regions.set(details.schoolName,new Set([details.username]));
+  }
+  res.json({status:true})
 })
-
 app.listen(3000, () => {
     ////console.log('Server is running on port 3000');
 });
 //g
+
+
