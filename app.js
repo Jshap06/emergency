@@ -93,6 +93,7 @@ app.post("/fulfillAxios",async(req,res)=>{
     const password=decryptDetails(details);
     details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+xmlEscape(password)+"</password>")
   }
+console.log(details.xml);
 try{
   var response=await axios.post(details.url,details.xml,{headers: {
             'Content-Type': 'text/xml',
