@@ -257,9 +257,8 @@ async function getGradeScale(details){
                       cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
                       ////console.log("fuck me sideways")
                       ////console.log(cookies)
-
+                      details.cookies=cookies
                   });
-                  details.cookies=cookies
                   await getRawClassData(details).then(data=>{res(parseClassData(data))}).catch(error=>{rej(error)})
             })
             .catch(rej1=>{
