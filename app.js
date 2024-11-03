@@ -117,7 +117,7 @@ try{
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
       const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
     }else{
-      let scale=getGradeScale({domain:details.url.replace("/Service/PXPCommunication.asmx",""),username:parsedXml.userID,password:parsedXml.password})
+      let scale=await getGradeScale({domain:details.url.replace("/Service/PXPCommunication.asmx",""),username:parsedXml.userID,password:parsedXml.password})
       gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),scale);
       sender.gradingScale=scale;
     }
