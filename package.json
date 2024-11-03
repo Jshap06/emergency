@@ -17,8 +17,9 @@
     "fast-xml-parser": "^4.5.0",
     "form-data": "^4.0.0",
     "jsdom": "^22.1.0",
-    "tough-cookie": "^4.1.4",
-    "xml-escape": "^1.1.0"
+       "xml-escape": "^1.1.0",
+    "tough-cookie": "^4.1.4"
+ 
   },
   "scripts": {
     "start": "node app.js"

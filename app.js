@@ -4,6 +4,8 @@ const cors = require('cors');
 const CryptoJS = require('crypto-js');
 const xmlEscape = require('xml-escape');
 const XMLParser = require('fast-xml-parser');
+const tough = require('tough-cookie');
+const { wrapper } = require('axios-cookiejar-support');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
