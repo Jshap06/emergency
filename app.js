@@ -215,7 +215,6 @@ async function getRawClassData(details){
         try{
             await axios.get(url,data,{headers:headers})
             .then(response=>{
-              console.log("yet i have no mouth");console.log(response.data)
                 if(response.data.includes("Internal Serer Error")){return rej(new Error("Authentication Cookies Expired"))};
                 res(response.data);
             })
@@ -253,14 +252,15 @@ async function getGradeScale(details){
               jar: cookieJar
           }));
           await logIn(details,session)
-            .then(res1=>{
+            .then(async (res1)=>{
                 cookieJar.getCookies(details.domain, (err, cookies) => {
                       cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
                       ////console.log("fuck me sideways")
                       ////console.log(cookies)
-                      details.cookies=cookies
-                      getRawClassData(details).then(data=>{res(parseClassData(data))}).catch(error=>{rej(error)})
+
                   });
+                  details.cookies=cookies
+                  await getRawClassData(details).then(data=>{res(parseClassData(data))}).catch(error=>{rej(error)})
             })
             .catch(rej1=>{
                 if (rej1.message.includes("key")){res(details.cookies)}else{
