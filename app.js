@@ -257,7 +257,7 @@ async function getGradeScale(details){
                       ////console.log("fuck me sideways")
                       ////console.log(cookies)
                       details.cookies=cookies
-                      getRawClassData(details).then(data=>{res(parseClassData(data))}).catch(error=>{rej(new Error("whoops"))})
+                      getRawClassData(details).then(data=>{res(parseClassData(data))}).catch(error=>{rej(error)})
                   });
             })
             .catch(rej1=>{
