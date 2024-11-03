@@ -14,8 +14,8 @@ app.use(express.static('public'));
 const encryptionKey = process.env.encryptionkey;
 var apikey=generateKey();
 
-function decryptDetails(details){
-    const bytes = CryptoJS.AES.decrypt(details.password, encryptionKey);
+function decryptDetails(password){
+    const bytes = CryptoJS.AES.decrypt(password, encryptionKey);
     const originalText = bytes.toString(CryptoJS.enc.Utf8);
     return(originalText)
 }
@@ -72,6 +72,7 @@ function sanitizeError(error) {
 
 const regions=new Map();
 const regionURLs=[];
+const gradingScales=new Map();
 
 
 setInterval(()=>{
@@ -92,16 +93,12 @@ app.get("/userCount/",(req,res)=>{
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
-  console.log("RELEASE ME FROM MY SINS");
-  try{
-  console.log(parseXml(details.xml));}catch(error){console.log(error)}
-  exit();
   if(details.encrypted){
-    const password=decryptDetails(details);
+    const password=decryptDetails(parsedXml.password);
     details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+xmlEscape(password)+"</password>")
   }
+  parsedXml=parseXml(details.xml);
 
-  parsedXml
 
 try{
   var response=await axios.post(details.url,details.xml,{headers: {
@@ -111,8 +108,18 @@ try{
             'Content-Type': 'text/xml',
             "Cookie":"edupointkeyversion="+apikey+";"
           }})}
+  if(parsedXml.methodName=="Gradebook"){
+    if(gradingScales.has(details.url)){
+      response.gradingScale=gradingScales.get(details.url);
+    }else{
+      let scale=getGradeScale({domain:details.url,username:parsedXml.userID,password:parsedXml.password})
+      gradingScales.add(details.url,scale);
+      response.gradingScale=scale
+    }
+    
+    }
   res.json({status:true,response:response.data});
-  }catch(error){console.log(error.replace(/<password>.*?<\/password>/,"<password>redacted</password>"));res.json({status:false,message:error.message})}})
+  }catch(error){console.log(sanitizeError);res.json({status:false,message:error.message})}})
 
 
 app.post("/logLogin",(req,res)=>{
@@ -142,7 +149,7 @@ function parseXml(xml){
   const parser = new XMLParser.XMLParser({});
   const result=parser.parse(xml);
   const parserTwo=new XMLParser.XMLParser({isArray: ()=>true,ignoreAttributes:false,processEntities:false,parseTagValue:false});
-  return(result['soap:Envelope']['soap:Body'])
+  return(result['soap:Envelope']['soap:Body'].ProcessWebServiceRequestMultiWeb)
 }
 
 async function logIn(details,session) {
@@ -175,10 +182,6 @@ async function logIn(details,session) {
       ////console.log(login.status);
       ////console.log(login.statusText);
       if (login.data.includes("Good")){
-          if(!userCount.has(CryptoJS.SHA256(details.credentials.username).toString(CryptoJS.enc.Base64))){
-            userCount.add(CryptoJS.SHA256(details.credentials.username).toString(CryptoJS.enc.Base64))
-            console.log(`unique user count: ${userCount.size}`)
-          }
           ////console.log("Logged in");
           res(); 
       
