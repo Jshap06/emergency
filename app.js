@@ -224,8 +224,9 @@ function parseClassData(data){
   data=data.reportCardScoreTypes;
   const gradeScale={};
   data[2].details.forEach(grade=>{
-    console.log(typeof(grade.lowScore));
+    console.log(grade)
       if(grade.lowScore>=0&&grade.highScore>=0){
+        console.log("bullshit")
         gradeScale[grade.score]=[grade.lowScore,grade.highScore];
 
   }});
