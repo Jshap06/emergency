@@ -231,7 +231,7 @@ function parseClassData(data){
 
   
 
-  return parsedData;
+  return gradeScale;
 }
 
 
