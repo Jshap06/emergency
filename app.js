@@ -92,7 +92,9 @@ app.get("/userCount/",(req,res)=>{
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
-  console.log(parseXml(details.xml));
+  console.log("RELEASE ME FROM MY SINS");
+  try{
+  console.log(parseXml(details.xml));}catch(error){console.log(error)}
   exit();
   if(details.encrypted){
     const password=decryptDetails(details);
