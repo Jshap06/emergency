@@ -200,7 +200,7 @@ async function logIn(details,session) {
 
 
 async function getRawClassData(details){
-      new Promise(async (res, rej)=>{
+  console.log("WHAT THE FUCKK IS FUCKING GOING ON")
       const url = details.domain+'/api/GB/ClientSideData/Transfer?action=genericdata.classdata-GetClassData';
       const data = new URLSearchParams({
             'FriendlyName': 'genericdata.classdata',
@@ -212,21 +212,13 @@ async function getRawClassData(details){
             'Referer': details.domain+'/PXP2_GradeBook.aspx?AGU=0',
             'Cookie':details.cookies
         };
-        try{
-            await axios.get(url,data,{headers:headers})
-            .then(response=>{
+ 
+            const response=await axios.get(url,data,{headers:headers})
               console.log("yet i have no mouth");console.log(response.data)
                 if(response.data.includes("Internal Serer Error")){return rej(new Error("Authentication Cookies Expired"))};
-                res(response.data);
-            })
-            .catch(error=>{
-                if(error.message.includes("hung up")||error.message.includes("ENOTFOUND")){return rej(new Error("Network Error: Try Again Shortly"))}
-                rej(error)})
-            //const response = await session.post(url, data, { headers });
-        }catch(error){return rej(error)}
-    })
-    
-    };
+                return(response.data);
+    }
+
 
 
 function parseClassData(data){
