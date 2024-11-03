@@ -252,17 +252,15 @@ async function getGradeScale(details){
               jar: cookieJar
           }));
           await logIn(details,session)
-            .then(async (res1)=>{
-                cookieJar.getCookies(details.domain, (err, cookies) => {
-                      cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
+          cookieJar.getCookies(details.domain, (err, cookies) => {
+          cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
                       ////console.log("fuck me sideways")
                       ////console.log(cookies)
-                      details.cookies=cookies;
-                  });
-                  await getRawClassData(details)
-                  .then(data=>{console.log(data);return(parseClassData(data))})
-                  .catch(error=>{reject(error)})
-            }) 
+          details.cookies=cookies;
+            });
+          const raw=await getRawClassData(details)
+          return(parseClassData(data))
+            
 
 }
 
