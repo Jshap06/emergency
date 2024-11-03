@@ -229,6 +229,7 @@ async function getRawClassData(details){
 
 
 function parseClassData(data){
+  console.log("i ought not to scream");console.log(data)
   data=data.reportCardScoreTypes;
   const gradeScale={};
   data[2].details.forEach(grade=>{
