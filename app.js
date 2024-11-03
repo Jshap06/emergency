@@ -112,17 +112,20 @@ try{
             'Content-Type': 'text/xml',
             "Cookie":"edupointkeyversion="+apikey+";"
           }})}
+  const sender={status:true,response:response.data}
   if(parsedXml.methodName=="Gradebook"){
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
       const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
     }else{
       let scale=getGradeScale({domain:details.url.replace("/Service/PXPCommunication.asmx",""),username:parsedXml.userID,password:parsedXml.password})
       gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),scale);
-      const gradingScale=scale
+      sender.gradingScale=scale;
     }
     
     }
-  res.json({status:true,response:response.data,gradingScale:gradingScale});
+    
+    
+  res.json(sender);
   }catch(error){console.log(sanitizeError);res.json({status:false,message:error.message})}})
 
 
