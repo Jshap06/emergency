@@ -259,7 +259,7 @@ async function getGradeScale(details){
           details.cookies=cookies;
             });
           const raw=await getRawClassData(details)
-          return(parseClassData(data))
+          return(parseClassData(raw))
             
 
 }
