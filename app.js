@@ -3,6 +3,7 @@ const axios = require('axios');
 const cors = require('cors');
 const CryptoJS = require('crypto-js');
 const xmlEscape = require('xml-escape');
+const XMLParser = require('fast-xml-parser');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
@@ -91,10 +92,15 @@ app.get("/userCount/",(req,res)=>{
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
+  console.log(parseXml(details.xml));
+  exit();
   if(details.encrypted){
     const password=decryptDetails(details);
     details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+xmlEscape(password)+"</password>")
   }
+
+  parsedXml
+
 try{
   var response=await axios.post(details.url,details.xml,{headers: {
             'Content-Type': 'text/xml',
@@ -114,6 +120,148 @@ app.post("/logLogin",(req,res)=>{
   }
   res.json({status:true})
 })
+
+
+const viewStates=new Map()
+
+setInterval(async ()=>{
+  for(const [domain,states] of viewStates.entries()){
+    console.log(domain);console.log(states);
+    await axios.get(domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True").then(response=>{
+        const [VIEWSTATE, EVENTVALIDATION]=parseFormData(response.data);
+    viewStates.set(domain,[VIEWSTATE,EVENTVALIDATION])}).catch(error=>{console.log(error);})}
+    
+  
+  
+},21600000)
+
+
+function parseXml(xml){
+  const parser = new XMLParser({});
+  const result=parser.parse(xml);
+  const parserTwo=new XMLParser({isArray: ()=>true,ignoreAttributes:false,processEntities:false,parseTagValue:false});
+  return(parserTwo.parse(result['soap:Envelope']['soap:Body'].ProcessWebServiceRequestMultiWeb))
+}
+
+async function logIn(details,session) {
+  return new Promise(async (res, rej)=>{
+  const url = details.domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True";
+  try{
+  if(!viewStates.has(details.domain)){
+  console.log("another axios")
+  const response2 = await axios.get(url).catch(error=>{return rej(error)})
+  const [VIEWSTATE, EVENTVALIDATION]=parseFormData(response2.data);
+  viewStates.set(details.domain,[VIEWSTATE,EVENTVALIDATION])}
+  const data = new FormData();
+  
+  data.append('__VIEWSTATE', viewStates.get(details.domain)[0]);
+  data.append('__EVENTVALIDATION', viewStates.get(details.domain)[1]);
+  data.append('ctl00$MainContent$username', details.credentials.username);
+  data.append('ctl00$MainContent$password', details.credentials.password);
+  data.append('ctl00$MainContent$Submit1', 'Login');
+
+      
+  const headers = {
+      'Origin': details.domain,
+      'Referer': details.domain + '/PXP2_Login_Student.aspx?Logout=1&regenerateSessionId=True',
+      ...(details.cookies && { 'Cookie': details.cookies })
+  };
+  
+      ////console.log(url);////console.log(data);////console.log(headers);
+      await session.post(url, data, { headers })
+          .then(login =>{
+      ////console.log(login.status);
+      ////console.log(login.statusText);
+      if (login.data.includes("Good")){
+          if(!userCount.has(CryptoJS.SHA256(details.credentials.username).toString(CryptoJS.enc.Base64))){
+            userCount.add(CryptoJS.SHA256(details.credentials.username).toString(CryptoJS.enc.Base64))
+            console.log(`unique user count: ${userCount.size}`)
+          }
+          ////console.log("Logged in");
+          res(); 
+      
+      } else if(login.data.includes("Invalid")||login.data.includes("incorrect")){
+      rej(new Error("Incorrect Username or Password"))
+      }else{rej(new Error("Synergy Side Error"))};}).catch(err=>{if(err.message.includes("hung up")||err.message.includes("ENOTFOUND")){rej(new Error("Network Error: Try Again Shortly"))}})
+
+}catch(error){console.log(error);return rej(error)}}
+      
+      )}
+
+
+async function getRawClassData(details){
+      new Promise(async (res, rej)=>{
+      const url = details.domain+'/api/GB/ClientSideData/Transfer?action=genericdata.classdata-GetClassData';
+      const data = new URLSearchParams({
+            'FriendlyName': 'genericdata.classdata',
+            'Method': 'GetClassData',
+            'Parameters': '{}'
+        });
+        const headers = {
+            'Origin': details.domain,
+            'Referer': details.domain+'/PXP2_GradeBook.aspx?AGU=0',
+            'Cookie':details.cookies
+        };
+        try{
+            await axios.get(url,data,{headers:headers})
+            .then(response=>{
+                if(response.data.includes("Internal Serer Error")){return rej(new Error("Authentication Cookies Expired"))};
+                res(response.data);
+            })
+            .catch(error=>{
+                if(error.message.includes("hung up")||error.message.includes("ENOTFOUND")){return rej(new Error("Network Error: Try Again Shortly"))}
+                rej(error)})
+            //const response = await session.post(url, data, { headers });
+        }catch(error){return rej(error)}
+    })
+    
+    };
+
+
+function parseClassData(data){
+  data=data.reportCardScoreTypes;
+  const gradeScale={};
+  data[2].details.forEach(grade=>{
+      if(grade.lowScore>=0&&grade.highScore>=0){
+        gradeScale[grade.score]=[grade.lowScore,grade.highScore]
+  }});
+
+
+  return parsedData;
+}
+
+
+
+async function getGradeScale(details){
+    new Promise(async (res, rej)=>{
+       const cookieJar = new tough.CookieJar();
+        const session = await wrapper(axios.create({
+              withCredentials: true,
+              jar: cookieJar
+          }));
+          await logIn(details,session)
+            .then(res1=>{
+                cookieJar.getCookies(details.domain, (err, cookies) => {
+                      cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
+                      ////console.log("fuck me sideways")
+                      ////console.log(cookies)
+                      details.cookies=cookies
+                      getRawClassData(details).then(data=>{res(parseClassData(data))}).catch(error=>{rej(new Error("whoops"))})
+                  });
+            })
+            .catch(rej1=>{
+                if (rej1.message.includes("key")){res(details.cookies)}else{
+                    if(rej1.message.includes("hung up")||rej1.message.includes("ENOTFOUND")){rej(new Error("Network Error: Try Again Shortly"))}else{
+                rej(rej1)}}})
+          
+          
+    })
+
+}
+
+
+
+
 app.listen(3000, () => {
     ////console.log('Server is running on port 3000');
 });
