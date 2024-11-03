@@ -142,7 +142,7 @@ function parseXml(xml){
   const parser = new XMLParser.XMLParser({});
   const result=parser.parse(xml);
   const parserTwo=new XMLParser.XMLParser({isArray: ()=>true,ignoreAttributes:false,processEntities:false,parseTagValue:false});
-  return(result);
+  return(result['soap:Envelope']['soap:Body'])
 }
 
 async function logIn(details,session) {
