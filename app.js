@@ -6,6 +6,7 @@ const xmlEscape = require('xml-escape');
 const XMLParser = require('fast-xml-parser');
 const tough = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
+const { JSDOM } = require('jsdom');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
