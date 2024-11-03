@@ -115,7 +115,7 @@ try{
       response.gradingScale=gradingScales.get(details.url);
     }else{
       let scale=getGradeScale({domain:details.url,username:parsedXml.userID,password:parsedXml.password})
-      gradingScales.add(details.url,scale);
+      gradingScales.set(details.url,scale);
       response.gradingScale=scale
     }
     
