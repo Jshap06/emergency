@@ -116,6 +116,7 @@ try{
   if(parsedXml.methodName=="Gradebook"){
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
       const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
+      sender.gradingScale=gradingScale;
     }else{
       let scale=await getGradeScale({domain:details.url.replace("/Service/PXPCommunication.asmx",""),username:parsedXml.userID,password:parsedXml.password})
       gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),scale);
