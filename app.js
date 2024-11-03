@@ -215,7 +215,6 @@ async function getRawClassData(details){
  
             const response=await axios.post(url,data,{headers:headers})
               console.log("yet i have no mouth");console.log(response.data)
-                if(response.data.includes("Internal Serer Error")){return rej(new Error("Authentication Cookies Expired"))};
                 return(response.data);
     }
 
