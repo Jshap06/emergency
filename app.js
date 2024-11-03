@@ -74,7 +74,6 @@ function sanitizeError(error) {
 }
 
 const regions=new Map();
-const regionURLs=[];
 const gradingScales=new Map();
 
 
@@ -115,15 +114,15 @@ try{
           }})}
   if(parsedXml.methodName=="Gradebook"){
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
-      response.gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
+      const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
     }else{
       let scale=getGradeScale({domain:details.url.replace("/Service/PXPCommunication.asmx",""),username:parsedXml.userID,password:parsedXml.password})
       gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),scale);
-      response.gradingScale=scale
+      const gradingScale=scale
     }
     
     }
-  res.json({status:true,response:response.data});
+  res.json({status:true,response:response.data,gradingScale:gradingScale});
   }catch(error){console.log(sanitizeError);res.json({status:false,message:error.message})}})
 
 
@@ -200,7 +199,6 @@ async function logIn(details,session) {
 
 
 async function getRawClassData(details){
-  console.log("WHAT THE FUCKK IS FUCKING GOING ON")
       const url = details.domain+'/api/GB/ClientSideData/Transfer?action=genericdata.classdata-GetClassData';
       const data = new URLSearchParams({
             'FriendlyName': 'genericdata.classdata',
@@ -214,14 +212,12 @@ async function getRawClassData(details){
         };
  
             const response=await axios.post(url,data,{headers:headers})
-              console.log("yet i have no mouth");console.log(response.data)
                 return(response.data);
     }
 
 
 
 function parseClassData(data){
-  console.log("i ought not to scream");console.log(data)
   data=data.reportCardScoreTypes;
   const gradeScale={};
   data[2].details.forEach(grade=>{
