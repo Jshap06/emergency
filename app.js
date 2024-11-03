@@ -235,6 +235,7 @@ function parseClassData(data){
         gradeScale[grade.score]=[grade.lowScore,grade.highScore]
   }});
 
+  
 
   return parsedData;
 }
@@ -266,6 +267,20 @@ async function getGradeScale(details){
           
     })
 
+}
+
+function parseFormData(loginPage) {
+  const dom = new JSDOM(loginPage);
+  const document = dom.window.document;
+
+  const viewStateElement = document.getElementById('__VIEWSTATE');
+  const eventValidationElement = document.getElementById('__EVENTVALIDATION');
+
+  const _VIEWSTATE = viewStateElement ? viewStateElement.value : null;
+  const _EVENTVALIDATION = eventValidationElement ? eventValidationElement.value : null;
+  ////console.log(_VIEWSTATE);////console.log(_EVENTVALIDATION);
+
+  return [_VIEWSTATE, _EVENTVALIDATION];
 }
 
 
