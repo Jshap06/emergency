@@ -170,8 +170,8 @@ async function logIn(details,session) {
   
   data.append('__VIEWSTATE', viewStates.get(details.domain)[0]);
   data.append('__EVENTVALIDATION', viewStates.get(details.domain)[1]);
-  data.append('ctl00$MainContent$username', details.credentials.username);
-  data.append('ctl00$MainContent$password', details.credentials.password);
+  data.append('ctl00$MainContent$username', details.username);
+  data.append('ctl00$MainContent$password', details.password);
   data.append('ctl00$MainContent$Submit1', 'Login');
 
       
