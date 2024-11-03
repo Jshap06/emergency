@@ -96,7 +96,7 @@ app.post("/fulfillAxios",async(req,res)=>{
   var parsedXml=parseXml(details.xml);
   if(details.encrypted){
     const password=decryptDetails(parsedXml.password);
-    details.xml=details.xml.replace("<password>"+details.password+"</password>","<password>"+xmlEscape(password)+"</password>")
+    details.xml=details.xml.replace("<password>"+parsedXml.password+"</password>","<password>"+xmlEscape(password)+"</password>")
     parsedXml=parseXml(details.xml);
   }
 
