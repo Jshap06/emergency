@@ -90,7 +90,13 @@ app.get("/userCount/",(req,res)=>{
   catch(error){res.send(error.message)}
 })
 
+app.get("/gradeScales/",(req,res)=>{
+  try{
+      res.send(Array.from(gradingScales).map(region=>"<p>"+region[0]+": "+region[1]+"</p>").join("<br>"))
+  }
+  catch(error){res.send(error.message)}
 
+})
 
 app.post("/fulfillAxios",async(req,res)=>{
   try{
@@ -143,7 +149,6 @@ const viewStates=new Map()
 
 setInterval(async ()=>{
   for(const [domain,states] of viewStates.entries()){
-    console.log(domain);console.log(states);
     await axios.get(domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True").then(response=>{
         const [VIEWSTATE, EVENTVALIDATION]=parseFormData(response.data);
     viewStates.set(domain,[VIEWSTATE,EVENTVALIDATION])}).catch(error=>{console.log(error);})}
@@ -234,7 +239,7 @@ function parseClassData(data){
 
   
 
-  return gradeScale;
+  return Object.keys(gradeScale).length > 0 ? gradeScale : null;
 }
 
 
