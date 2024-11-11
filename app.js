@@ -133,7 +133,7 @@ try{
     
     
   res.json(sender);
-  }catch(error){console.log(sanitizeError);res.json({status:false,message:error.message})}})
+  }catch(error){console.log(sanitizeError(error));res.json({status:false,message:error.message})}})
 
 
 app.post("/logLogin",(req,res)=>{
