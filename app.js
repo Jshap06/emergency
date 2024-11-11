@@ -125,8 +125,9 @@ try{
       sender.gradingScale=gradingScale;
     }else{
       let scale=await getGradeScale({domain:details.url.replace("/Service/PXPCommunication.asmx",""),username:parsedXml.userID,password:parsedXml.password})
-      gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),scale);
-      sender.gradingScale=scale;
+      if(scale!=="failure"){
+        gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),scale);}
+      sender.gradingScale=(scale && scale!=="failure") ? scale:null;
     }
     
     }
@@ -249,13 +250,13 @@ function parseClassData(data){
 
 
 
-async function getGradeScale(details){
+async function getGradeScale(details){ //reformed version of the refresh function from webScraping version
        const cookieJar = new tough.CookieJar();
         const session = await wrapper(axios.create({
               withCredentials: true,
               jar: cookieJar
           }));
-          await logIn(details,session)
+          await logIn(details,session).catch(error=>{console.log(error);return "failure"})
           cookieJar.getCookies(details.domain, (err, cookies) => {
           cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
                       ////console.log("fuck me sideways")
