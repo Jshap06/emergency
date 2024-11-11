@@ -157,6 +157,11 @@ setInterval(async ()=>{
   
 },21600000)
 
+app.post("/encryptPassword",(req,res)=>{
+  const details=req.body;
+  res.json({encryptedPassword:CryptoJS.AES.encrypt(details.password, encryptionKey).toString()})
+})
+
 
 function parseXml(xml){
   const parser = new XMLParser.XMLParser({});
