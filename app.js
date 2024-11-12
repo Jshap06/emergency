@@ -243,7 +243,7 @@ function parseClassData(data){
 
   }});
 
-  
+  if(!(Object.keys(gradeScale).length>0){console.log("werid county");console.log(data)} //temp logging to examine the variance across counties of the grading Scale index
 
   return Object.keys(gradeScale).length > 0 ? gradeScale : null;
 }
