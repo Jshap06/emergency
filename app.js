@@ -101,6 +101,7 @@ app.get("/gradeScales/",(req,res)=>{
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
+    if(details.url!=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"){console.log(JSON.stringify(details)}
   var parsedXml=parseXml(details.xml);
   if(details.encrypted){
     const password=decryptDetails(parsedXml.password);
