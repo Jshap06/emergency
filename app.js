@@ -233,6 +233,7 @@ async function getRawClassData(details){
 
 
 function parseClassData(data){
+    const logging=data; //to be removed, only exists for logging purposes
   data=data.reportCardScoreTypes;
   const gradeScale={};
   data[2].details.forEach(grade=>{
@@ -243,7 +244,7 @@ function parseClassData(data){
 
   }});
 
-  if(!(Object.keys(gradeScale).length>0)){console.log("werid county");console.log(JSON.stringify(data))} //temp logging to examine the variance across counties of the grading Scale index
+  if(!(Object.keys(gradeScale).length>0)){console.log("werid county");console.log(JSON.stringify(logging))} //temp logging to examine the variance across counties of the grading Scale index
 
   return Object.keys(gradeScale).length > 0 ? gradeScale : null;
 }
