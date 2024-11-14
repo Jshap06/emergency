@@ -81,7 +81,7 @@ setInterval(()=>{
     apikey=generateKey();
 },86400000);
 
-
+app.get("/",(req,res)=>{res.send(`<h1>GradeMelon API</h1><a href="/userCount/">User Count</a><br><a href="/gradeScales/">Grade Scales</a>`)})
 
 app.get("/userCount/",(req,res)=>{
   try{
