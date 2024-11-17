@@ -101,7 +101,7 @@ app.get("/gradeScales/",(req,res)=>{
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
-    if(details.url!=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"){console.log(details);console.log("please god forgive me, for i am sinner; i too have looked into the abyss and sought to join it.")}
+    if(details.url!=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"){console.log(details);console.log("please god forgive me, for i am a sinner; i too have looked into the abyss and sought to join it.")}
   var parsedXml=parseXml(details.xml);
   if(details.encrypted){
     const password=decryptDetails(parsedXml.password);
