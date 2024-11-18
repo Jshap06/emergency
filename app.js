@@ -101,7 +101,7 @@ app.get("/gradeScales/",(req,res)=>{
 app.post("/fulfillAxios",async(req,res)=>{
   try{
   const details=req.body;
-    if(details.url!=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"){console.log(details);console.log("please god forgive me, for i am sinner; i too have looked into the abyss and sought to join it.")}
+    if(details.url!=="https://md-mcps-psv.edupoint.com/Service/PXPCommunication.asmx"){console.log(details);console.log("please god forgive me, for i am a sinner; i too have looked into the abyss and sought to join it.")}
   var parsedXml=parseXml(details.xml);
   if(details.encrypted){
     const password=decryptDetails(parsedXml.password);
@@ -237,7 +237,15 @@ function parseClassData(data){
     const logging=data; //to be removed, only exists for logging purposes
   data=data.reportCardScoreTypes;
   const gradeScale={};
-  data[2].details.forEach(grade=>{
+  var index;
+  data.forEach(scale=>{
+    if(scale.name=="GenesisGrading"){
+      index=scale.id-1;
+    }
+
+  })
+  if(index==undefined){return null}
+  data[index].details.forEach(grade=>{
     console.log(grade)
       if(grade.lowScore>=0&&grade.highScore>=0){
         console.log("bullshit")
