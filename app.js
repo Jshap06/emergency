@@ -120,7 +120,7 @@ try{
             "Cookie":"edupointkeyversion="+apikey+";"
           }})}
   const sender={status:true,response:response.data}
-  if(parsedXml.methodName=="Gradebook"){
+  if(parsedXml.methodName=="Gradebook"&&false){ //temporarily disabled due to the fact that the webscraping is currently broken
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
       const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
       sender.gradingScale=gradingScale;
@@ -131,6 +131,9 @@ try{
       sender.gradingScale=(scale && scale!=="failure") ? scale:null;
     }
     
+    }
+    if(parsedXml.methodName=="Gradebook"){
+      sender.gradeScale=null;
     }
     
     
@@ -153,7 +156,7 @@ setInterval(async ()=>{
   for(const [domain,states] of viewStates.entries()){
     await axios.get(domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True").then(response=>{
         const [VIEWSTATE, EVENTVALIDATION]=parseFormData(response.data);
-    viewStates.set(domain,[VIEWSTATE,EVENTVALIDATION])}).catch(error=>{console.log(error);})}
+    viewStates.set(domain,[VIEWSTATE,EVENTVALIDATION])}).catch(error=>{console.log("BALLS");console.log(error);})}
     
   
   
@@ -173,13 +176,16 @@ function parseXml(xml){
 }
 
 async function logIn(details,session) {
+  console.log("ima crash out")
   return new Promise(async (res, rej)=>{
   const url = details.domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True";
   try{
   if(!viewStates.has(details.domain)){
   console.log("another axios")
-  const response2 = await axios.get(url).catch(error=>{return rej(error)})
+  const response2 = await axios.get(url).catch(error=>{console.log("BALLZ");console.log(error);return rej(error)})
+  console.log("who am I? 24601?")
   const [VIEWSTATE, EVENTVALIDATION]=parseFormData(response2.data);
+  console.log("hope it all worked out");
   viewStates.set(details.domain,[VIEWSTATE,EVENTVALIDATION])}
   const data = new FormData();
   
@@ -202,12 +208,18 @@ async function logIn(details,session) {
       ////console.log(login.status);
       ////console.log(login.statusText);
       if (login.data.includes("Good")){
+        console.log('logged in i suppose');
           ////console.log("Logged in");
           res(); 
       
       } else if(login.data.includes("Invalid")||login.data.includes("incorrect")){
+        console.log("nothing is pure all is lost and invalid")
+        console.log(login.data)
       rej(new Error("Incorrect Username or Password"))
-      }else{rej(new Error("Synergy Side Error"))};}).catch(err=>{if(err.message.includes("hung up")||err.message.includes("ENOTFOUND")){rej(new Error("Network Error: Try Again Shortly"))}})
+      }else{
+        console.log("suck me you cunt")
+        console.log(login.data)
+        rej(new Error("Synergy Side Error"))};}).catch(err=>{if(err.message.includes("hung up")||err.message.includes("ENOTFOUND")){rej(new Error("Network Error: Try Again Shortly"))}})
 
 }catch(error){console.log(error);return rej(error)}}
       
@@ -227,7 +239,7 @@ async function getRawClassData(details){
             'Cookie':details.cookies
         };
  
-            const response=await axios.post(url,data,{headers:headers})
+            const response=await axios.post(url,data,{headers:headers}).catch(error=>{console.log("BALLS");console.log(error);return "failure"});
                 return(response.data);
     }
 
@@ -266,7 +278,7 @@ async function getGradeScale(details){ //reformed version of the refresh functio
               withCredentials: true,
               jar: cookieJar
           }));
-          await logIn(details,session).catch(error=>{console.log(error);return "failure"})
+          await logIn(details,session).catch(error=>{console.log("BALLS");console.log(error);return "failure"});
           cookieJar.getCookies(details.domain, (err, cookies) => {
           cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
                       ////console.log("fuck me sideways")
