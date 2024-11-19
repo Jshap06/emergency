@@ -131,7 +131,7 @@ try{
   var response=await axios.post(details.url,details.xml,{headers:headers})}catch(error){var response=await axios.post(details.url,details.xml,{headers:headers})}
   sender.response=response.data;
 
-  if(parsedXml.methodName=="Gradebook"){
+  if(parsedXml.methodName=="Gradebook"&&!gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
     const raw=await getRawClassData({domain:details.url.replace("/Service/PXPCommunication.asmx",""),cookies:headers.Cookie}).catch();
     if(raw!=="failure"){
       gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),gradingScale);
