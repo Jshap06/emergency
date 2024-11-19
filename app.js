@@ -116,9 +116,8 @@ app.post("/fulfillAxios",async(req,res)=>{
 
   if(parsedXml.methodName=="Gradebook"){
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
-      const mygradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
-      sender.gradingScale=mygradingScale;
-      console.log(gradingScale);console.log("am I fucking tripping?");console.log(sender)
+      const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
+      sender.gradingScale=gradingScale;
     }else{
       const cookies=await getSessionCookies({domain:details.url.replace("/Service/PXPCommunication.asmx","")});
       headers.Cookie+=cookies;
@@ -135,8 +134,10 @@ try{
   if(parsedXml.methodName=="Gradebook"&&!gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
     const raw=await getRawClassData({domain:details.url.replace("/Service/PXPCommunication.asmx",""),cookies:headers.Cookie}).catch();
     if(raw!=="failure"){
+      var gradingScale=parseClassData(raw);
       gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),gradingScale);
-      var gradingScale=parseClassData(raw);}
+      
+    }
     else{
       var gradingScale=null;
     }
