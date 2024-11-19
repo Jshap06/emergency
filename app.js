@@ -119,7 +119,7 @@ app.post("/fulfillAxios",async(req,res)=>{
       const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
       sender.gradingScale=gradingScale;
     }else{
-      cookies=await getSessionCookies({domain:details.url.replace("/Service/PXPCommunication.asmx","")});
+      const cookies=await getSessionCookies({domain:details.url.replace("/Service/PXPCommunication.asmx","")});
       headers.Cookie+=cookies;
 
     }
