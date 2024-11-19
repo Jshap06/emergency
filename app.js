@@ -108,35 +108,36 @@ app.post("/fulfillAxios",async(req,res)=>{
     details.xml=details.xml.replace("<password>"+parsedXml.password+"</password>","<password>"+xmlEscape(password)+"</password>")
     parsedXml=parseXml(details.xml);
   }
+  const sender={status:true}
+  const headers={
+    'Content-Type': 'text/xml',
+    "Cookie":"edupointkeyversion="+apikey+";"
+  }
 
-
-
-try{
-  var response=await axios.post(details.url,details.xml,{headers: {
-            'Content-Type': 'text/xml',
-            "Cookie":"edupointkeyversion="+apikey+";"
-          }})}catch(error){  var response=await axios.post(details.url,details.xml,{headers: {
-            'Content-Type': 'text/xml',
-            "Cookie":"edupointkeyversion="+apikey+";"
-          }})}
-  const sender={status:true,response:response.data}
-  if(parsedXml.methodName=="Gradebook"&&false){ //temporarily disabled due to the fact that the webscraping is currently broken
+  if(parsedXml.methodName=="Gradebook"){
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
       const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
       sender.gradingScale=gradingScale;
     }else{
-      let scale=await getGradeScale({domain:details.url.replace("/Service/PXPCommunication.asmx",""),username:parsedXml.userID,password:parsedXml.password})
-      if(scale!=="failure"){
-        gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),scale);}
-      sender.gradingScale=(scale && scale!=="failure") ? scale:null;
+      cookies=await getSessionCookies({domain:details.url.replace("/Service/PXPCommunication.asmx","")});
+      headers.Cookie+=cookies;
+
     }
     
     }
-    if(parsedXml.methodName=="Gradebook"){
-      sender.gradeScale=null;
-    }
-    
-    
+  
+
+try{
+  var response=await axios.post(details.url,details.xml,{headers:headers})}catch(error){var response=await axios.post(details.url,details.xml,{headers:headers})}
+  sender.response=response.data;
+
+  if(parsedXml.methodName=="Gradebook"){
+    const raw=await getRawClassData({domain:details.url.replace("/Service/PXPCommunication.asmx",""),cookies:headers.Cookie}).catch();
+    const gradingScale=parseClassData(raw);
+    if(raw!=="failure"){
+    gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),gradingScale);}
+    sender.gradingScale=gradingScale;
+  }
   res.json(sender);
   }catch(error){console.log(sanitizeError(error));res.json({status:false,message:error.message})}})
 
@@ -150,17 +151,6 @@ app.post("/logLogin",(req,res)=>{
 })
 
 
-const viewStates=new Map()
-
-setInterval(async ()=>{
-  for(const [domain,states] of viewStates.entries()){
-    await axios.get(domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True").then(response=>{
-        const [VIEWSTATE, EVENTVALIDATION]=parseFormData(response.data);
-    viewStates.set(domain,[VIEWSTATE,EVENTVALIDATION])}).catch(error=>{console.log("BALLS");console.log(error);})}
-    
-  
-  
-},21600000)
 
 app.post("/encryptPassword",(req,res)=>{
   const details=req.body;
@@ -174,56 +164,6 @@ function parseXml(xml){
   const parserTwo=new XMLParser.XMLParser({isArray: ()=>true,ignoreAttributes:false,processEntities:false,parseTagValue:false});
   return(result['soap:Envelope']['soap:Body'].ProcessWebServiceRequestMultiWeb)
 }
-
-async function logIn(details,session) {
-  console.log("ima crash out")
-  return new Promise(async (res, rej)=>{
-  const url = details.domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True";
-  try{
-  if(!viewStates.has(details.domain)){
-  console.log("another axios")
-  const response2 = await axios.get(url).catch(error=>{console.log("BALLZ");console.log(error);return rej(error)})
-  console.log("who am I? 24601?")
-  const [VIEWSTATE, EVENTVALIDATION]=parseFormData(response2.data);
-  console.log("hope it all worked out");
-  viewStates.set(details.domain,[VIEWSTATE,EVENTVALIDATION])}
-  const data = new FormData();
-  
-  data.append('__VIEWSTATE', viewStates.get(details.domain)[0]);
-  data.append('__EVENTVALIDATION', viewStates.get(details.domain)[1]);
-  data.append('ctl00$MainContent$username', details.username);
-  data.append('ctl00$MainContent$password', details.password);
-  data.append('ctl00$MainContent$Submit1', 'Login');
-
-      
-  const headers = {
-      'Origin': details.domain,
-      'Referer': details.domain + '/PXP2_Login_Student.aspx?Logout=1&regenerateSessionId=True',
-      ...(details.cookies && { 'Cookie': details.cookies })
-  };
-  
-      ////console.log(url);////console.log(data);////console.log(headers);
-      await session.post(url, data, { headers })
-          .then(login =>{
-      ////console.log(login.status);
-      ////console.log(login.statusText);
-      if (login.data.includes("Good")){
-        console.log('logged in i suppose');
-          ////console.log("Logged in");
-          res(); 
-      
-      } else if(login.data.includes("Invalid")||login.data.includes("incorrect")){
-        console.log("nothing is pure all is lost and invalid")
-        console.log(login.data)
-      rej(new Error("Incorrect Username or Password"))
-      }else{
-        console.log("suck me you cunt")
-        console.log(login.data)
-        rej(new Error("Synergy Side Error"))};}).catch(err=>{if(err.message.includes("hung up")||err.message.includes("ENOTFOUND")){rej(new Error("Network Error: Try Again Shortly"))}})
-
-}catch(error){console.log(error);return rej(error)}}
-      
-      )}
 
 
 async function getRawClassData(details){
@@ -272,37 +212,15 @@ function parseClassData(data){
 
 
 
-async function getGradeScale(details){ //reformed version of the refresh function from webScraping version
-       const cookieJar = new tough.CookieJar();
-        const session = await wrapper(axios.create({
-              withCredentials: true,
-              jar: cookieJar
-          }));
-          await logIn(details,session).catch(error=>{console.log("BALLS");console.log(error);return "failure"});
-          cookieJar.getCookies(details.domain, (err, cookies) => {
-          cookies="PVUE=ENG; "+cookies[0].key+"="+cookies[0].value + "; " + cookies[2].key + "="+cookies[2].value+";";
-                      ////console.log("fuck me sideways")
-                      ////console.log(cookies)
-          details.cookies=cookies;
-            });
-          const raw=await getRawClassData(details)
-          return(parseClassData(raw))
+async function getSessionCookies(details){ //gets valid session cookies
+       url=details.domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True";
+      const response = await axios.get(url,{withCredentials:true}).catch(error=>{console.log("BALLS");console.log(error);return "failure"});
+      const cookies=response.headers['set-cookie'];
+      const cookiestring="";
+      cookies.map(cookie=>{return cookie.substring(0,cookie.indexOf(";"))}).forEach(cookie=>{cookiestring+=cookie+"; "})
+      return(cookiestring);
             
 
-}
-
-function parseFormData(loginPage) {
-  const dom = new JSDOM(loginPage);
-  const document = dom.window.document;
-
-  const viewStateElement = document.getElementById('__VIEWSTATE');
-  const eventValidationElement = document.getElementById('__EVENTVALIDATION');
-
-  const _VIEWSTATE = viewStateElement ? viewStateElement.value : null;
-  const _EVENTVALIDATION = eventValidationElement ? eventValidationElement.value : null;
-  ////console.log(_VIEWSTATE);////console.log(_EVENTVALIDATION);
-
-  return [_VIEWSTATE, _EVENTVALIDATION];
 }
 
 
