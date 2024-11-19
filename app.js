@@ -133,9 +133,13 @@ try{
 
   if(parsedXml.methodName=="Gradebook"){
     const raw=await getRawClassData({domain:details.url.replace("/Service/PXPCommunication.asmx",""),cookies:headers.Cookie}).catch();
-    const gradingScale=parseClassData(raw);
     if(raw!=="failure"){
-    gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),gradingScale);}
+      gradingScales.set(details.url.replace("/Service/PXPCommunication.asmx",""),gradingScale);
+      var gradingScale=parseClassData(raw);}
+    else{
+      var gradingScale=null;
+    }
+   
     sender.gradingScale=gradingScale;
   }
   res.json(sender);
