@@ -183,7 +183,7 @@ async function getRawClassData(details){
             'Cookie':details.cookies
         };
  
-            const response=await axios.post(url,data,{headers:headers}).catch(error=>{console.log("BALLS");console.log(error);return "failure"});
+            const response=await axios.post(url,data,{headers:headers}).catch(error=>{console.log("get raw class data fail");console.log(error);return "failure"});
                 return(response.data);
     }
 
@@ -218,7 +218,7 @@ function parseClassData(data){
 
 async function getSessionCookies(details){ //gets valid session cookies
        url=details.domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True";
-      const response = await axios.get(url,{withCredentials:true}).catch(error=>{console.log("BALLS");console.log(error);return "failure"});
+      const response = await axios.get(url,{withCredentials:true}).catch(error=>{console.log("sessionCookies Fail");console.log(error);return "failure"});
       var cookies=response.headers['set-cookie'];
       var cookiestring="";
       cookies.map(cookie=>{return cookie.substring(0,cookie.indexOf(";"))}).forEach(cookie=>{cookiestring+=cookie+"; "})
