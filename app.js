@@ -116,8 +116,9 @@ app.post("/fulfillAxios",async(req,res)=>{
 
   if(parsedXml.methodName=="Gradebook"){
     if(gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
-      const gradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
-      sender.gradingScale=gradingScale;
+      const mygradingScale=gradingScales.get(details.url.replace("/Service/PXPCommunication.asmx",""));
+      sender.gradingScale=mygradingScale;
+      console.log(gradingScale);console.log("am I fucking tripping?");console.log(sender)
     }else{
       const cookies=await getSessionCookies({domain:details.url.replace("/Service/PXPCommunication.asmx","")});
       headers.Cookie+=cookies;
