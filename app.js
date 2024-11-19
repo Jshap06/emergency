@@ -216,7 +216,7 @@ async function getSessionCookies(details){ //gets valid session cookies
        url=details.domain+"/PXP2_Login_Student.aspx?regenerateSessionId=True";
       const response = await axios.get(url,{withCredentials:true}).catch(error=>{console.log("BALLS");console.log(error);return "failure"});
       var cookies=response.headers['set-cookie'];
-      const cookiestring="";
+      var cookiestring="";
       cookies.map(cookie=>{return cookie.substring(0,cookie.indexOf(";"))}).forEach(cookie=>{cookiestring+=cookie+"; "})
       return(cookiestring);
             
