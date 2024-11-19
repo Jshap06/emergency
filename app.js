@@ -196,9 +196,9 @@ function parseClassData(data){
   data=data.reportCardScoreTypes;
   const gradeScale={};
   var index;
-  data.forEach(scale=>{
+  data.forEach((scale,aindex)=>{
     if(scale.name=="GenesisGrading"){
-      index=scale.id-1;
+      index=aindex;
     }
 
   })
