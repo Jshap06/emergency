@@ -87,8 +87,8 @@ function listFromRegion(date){
   if(!regions.has(date)){return("no such data")}
   const subregion=regions.get(date)
   let sendstring=`<h1>User Count ${date}</h1>`;
-  sendstring+=`<br></br><a href="/userCount/${getDateMMDDYY(1,date)}">Prev</a><br></br>`;
-  sendstring+=`<a href="/userCount/${getDateMMDDYY(-1,date)}">Next</a><br></br>`;
+  sendstring+=`<br></br><a href="/userCount/${getDateMMDDYY(date,-1)}">Prev</a><br></br>`;
+  sendstring+=`<a href="/userCount/${getDateMMDDYY(date,1)}">Next</a><br></br>`;
   return(sendstring+Array.from(subregion).map(region=>"<p>"+region[0]+": "+region[1].size+"</p>").join("<br>"));
   }
   catch(error){return(error.message)}
