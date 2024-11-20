@@ -175,8 +175,16 @@ try{
 
 app.post("/logLogin",(req,res)=>{
   const details=req.body;
-  if(regions.has(details.schoolName)){regions.get(details.schoolName).add(details.username)}else{
-    regions.set(details.schoolName,new Set([details.username]));
+  const date=getDateMMDDYY();
+  if(regions.has(date)){
+  if(regions.get(date).has(details.schoolName)){regions.get(date).get(details.schoolName).add(details.username)}else{
+    regions.get(date).set(details.schoolName,new Set([details.username]));
+  }}
+  else{
+    regions.set(date,new Map());
+    regions.get(date).set(details.schoolName,new Set([details.username]))
+
+
   }
   res.json({status:true})
 })
