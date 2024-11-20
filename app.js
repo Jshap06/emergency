@@ -23,7 +23,7 @@ function decryptDetails(password){
     return(originalText)
 }
 
-function getCurrentDateMMDDYYYY(inputDate=null,offset=0) {
+function getDateMMDDYY(inputDate=null,offset=0) {
   let date = !inputDate ? new Date() : new Date(inputDate.substring(0,2)+"/"+inputDate.substring(2,4)+"/"+inputDate.substring(4));
   const epoch=date.getTime();
   date=new Date(epoch+offset*1000*60*60*24)
@@ -81,14 +81,39 @@ setInterval(()=>{
     apikey=generateKey();
 },86400000);
 
+
+function listFromRegion(date){
+  try{
+  if(!regions.has(date)){return("no such data")}
+  const subregion=regions.get(date)
+  let sendstring=`<h1>User Count ${date}</h1>`;
+  sendstring+=`<br></br><a href="/userCount/${getDateMMDDYY(1,date)}">Prev</a><br></br>`;
+  sendstring+=`<a href="/userCount/${getDateMMDDYY(-1,date)}">Next</a><br></br>`;
+  return(sendstring+Array.from(subregion).map(region=>"<p>"+region[0]+": "+region[1].size+"</p>").join("<br>"));
+  }
+  catch(error){return("no such data :(")}
+}
+
+
 app.get("/",(req,res)=>{res.send(`<h1>GradeMelon API</h1><a href="/userCount/">User Count</a><br><a href="/gradeScales/">Grade Scales</a>`)})
+
 
 app.get("/userCount/",(req,res)=>{
   try{
-      res.send(Array.from(regions).map(region=>"<p>"+region[0]+": "+region[1].size+"</p>").join("<br>"))
+    res.send(listFromRegion(getDateMMDDYY()));
   }
   catch(error){res.send(error.message)}
 })
+
+app.get("/userCount/:date",(req,res)=>{
+  const date=req.params.date;
+  try{
+    res.send(listFromRegion(date))
+  }
+  catch(error){console.log(error);res.send("No data for this date")}
+})
+
+
 
 app.get("/gradeScales/",(req,res)=>{
   try{
