@@ -118,9 +118,9 @@ app.get("/userCount/:date",(req,res)=>{
 
 app.get("/gradeScales/",(req,res)=>{
   try{
-      res.send(Array.from(gradingScales).map(region=>"<p>"+region[0]+": "+region[1]+"</p>").join("<br>"))
+      res.send("<a href='javascript:window.history.back()'>back</a><br/>"+Array.from(gradingScales).map(region=>"<p>"+region[0]+": "+region[1]+"</p>").join("<br>"))
   }
-  catch(error){res.send(error.message)}
+  catch(error){res.send("<a href='javascript:window.history.back()'>back</a><br/>"+error.message)}
 
 })
 
