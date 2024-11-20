@@ -23,13 +23,13 @@ function decryptDetails(password){
     return(originalText)
 }
 
-function getCurrentDateMMDDYYYY() {
-    const date = new Date();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so +1
-    const day = String(date.getDate()).padStart(2, '0');
-    const year = date.getFullYear();
-
-    return `${month}${day}${year}`;
+function getDateMMDDYY(daysBefore = 0,pivotDate = null) {
+  const date = pivotDate ? new Date(`20${pivotDate.slice(4, 6)}-${pivotDate.slice(0, 2)}-${pivotDate.slice(2, 4)}`) : new Date();
+  date.setDate(date.getDate() - daysBefore); // Adjust the date by daysBefore (can be negative)
+  const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const dd = String(date.getDate()).padStart(2, '0');
+  const yy = String(date.getFullYear()).slice(-2); // Last two digits of the year
+  return `${mm}${dd}${yy}`;
 }
 
 
@@ -44,7 +44,7 @@ function generateKey() {
     console.log("IV Bytes: ", ivBytes);
 
     // Define the input string (date, version, etc.)
-    const today = getCurrentDateMMDDYYYY();
+    const today = getDateMMDDYY();
     let input = `${today}|8.7.0|${today}|android`;
 
     // Encrypt the input string using AES with CBC mode and PKCS7 padding
