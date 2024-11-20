@@ -91,7 +91,7 @@ function listFromRegion(date){
   sendstring+=`<a href="/userCount/${getDateMMDDYY(-1,date)}">Next</a><br></br>`;
   return(sendstring+Array.from(subregion).map(region=>"<p>"+region[0]+": "+region[1].size+"</p>").join("<br>"));
   }
-  catch(error){return("no such data :(")}
+  catch(error){return(error.message)}
 }
 
 
