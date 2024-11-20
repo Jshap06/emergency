@@ -23,16 +23,16 @@ function decryptDetails(password){
     return(originalText)
 }
 
-function getDateMMDDYY(daysBefore = 0,pivotDate = null) {
-  const date = pivotDate ? new Date(`20${pivotDate.slice(4, 6)}-${pivotDate.slice(0, 2)}-${pivotDate.slice(2, 4)}`) : new Date();
-  date.setDate(date.getDate() - daysBefore); // Adjust the date by daysBefore (can be negative)
-  const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-  const dd = String(date.getDate()).padStart(2, '0');
-  const yy = String(date.getFullYear()).slice(-2); // Last two digits of the year
-  return `${mm}${dd}${yy}`;
+function getCurrentDateMMDDYYYY(inputDate=null,offset=0) {
+  let date = !inputDate ? new Date() : new Date(inputDate.substring(0,2)+"/"+inputDate.substring(2,4)+"/"+inputDate.substring(4));
+  const epoch=date.getTime();
+  date=new Date(epoch+offset*1000*60*60*24)
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so +1
+  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${month}${day}${year}`;
 }
-
-
 
 function generateKey() {
   try {
