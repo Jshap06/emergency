@@ -86,7 +86,7 @@ function listFromRegion(date){
   try{
   if(!regions.has(date)){return("no such data")}
   const subregion=regions.get(date)
-  let sendstring=`<h1>User Count ${date}</h1>`;
+  let sendstring=`<h1>User Count ${date.substring(0,2)+"/"+date.substring(2,4)+"/"+date.substring(4)}</h1>`;
   sendstring+=`<br></br><a href="/userCount/${getDateMMDDYY(date,-1)}">Prev</a><br></br>`;
   sendstring+=`<a href="/userCount/${getDateMMDDYY(date,1)}">Next</a><br></br>`;
   return(sendstring+Array.from(subregion).map(region=>"<p>"+region[0]+": "+region[1].size+"</p>").join("<br>"));
