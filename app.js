@@ -75,7 +75,7 @@ function sanitizeError(error) {
 
 const regions=new Map();
 const gradingScales=new Map();
-
+const backButton="<a href='javascript:window.history.back()'>back</a><br/>";
 
 setInterval(()=>{
     apikey=generateKey();
@@ -104,7 +104,7 @@ app.get("/",(req,res)=>{res.send(`<h1>GradeMelon API</h1><a href="/userCount/">U
 app.get("/userCount/",(req,res)=>{
   try{
 
-    res.send("<a href='javascript:window.history.back()'>back</a><br/>"+listFromRegion(getDateMMDDYY()));
+    res.send(backButton+listFromRegion(getDateMMDDYY()));
   }
   catch(error){res.send(error.message)}
 })
@@ -112,18 +112,18 @@ app.get("/userCount/",(req,res)=>{
 app.get("/userCount/:date",(req,res)=>{
   const date=req.params.date;
   try{
-    res.send(listFromRegion(date))
+    res.send(backButton+listFromRegion(date))
   }
-  catch(error){console.log(error);res.send("<a href='javascript:window.history.back()'>back</a><br/>"+"No data for this date")}
+  catch(error){console.log(error);res.send(backButton+"No data for this date")}
 })
 
 
 
 app.get("/gradeScales/",(req,res)=>{
   try{
-      res.send("<a href='javascript:window.history.back()'>back</a><br/>"+Array.from(gradingScales).map(region=>"<p>"+region[0]+": "+region[1]+"</p>").join("<br>"))
+      res.send(backButton+Array.from(gradingScales).map(region=>"<p>"+region[0]+": "+region[1]+"</p>").join("<br>"))
   }
-  catch(error){res.send("<a href='javascript:window.history.back()'>back</a><br/>"+error.message)}
+  catch(error){res.send(backButton+error.message)}
 
 })
 
