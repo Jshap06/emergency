@@ -160,7 +160,7 @@ try{
   var response=await axios.post(details.url,details.xml,{headers:headers})}catch(error){var response=await axios.post(details.url,details.xml,{headers:headers})}
   sender.response=response.data;
 
-  if(parsedXml.methodName=="Gradebook"&&!gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))){
+  if(parsedXml.methodName=="Gradebook"&&!gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))&&!response.data.toLowerCase().includes("RT_ERROR ERROR_MESSAGE")){
     const raw=await getRawClassData({domain:details.url.replace("/Service/PXPCommunication.asmx",""),cookies:headers.Cookie}).catch();
     if(raw!=="failure"){
       var gradingScale=parseClassData(raw);
