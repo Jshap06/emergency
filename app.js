@@ -228,7 +228,6 @@ async function hasDate(date) {
 
     // Execute the query
     const result = await pool.query(query, [date]);
-    console.log("has date nigga?");console.log(result)
 
     // Return the relevant row if it exists, otherwise false
     return result.rows[0] || false;
@@ -247,7 +246,7 @@ async function hasSchoolName(schoolName) {
     // Connect to the database
     //await client.connect();
 
-    console.log('Connected to PostgreSQL');
+
     
     // Use parameterized queries to prevent SQL injection
     const query = `
@@ -262,7 +261,7 @@ async function hasSchoolName(schoolName) {
     const result = await pool.query(query, [schoolName]);
 
     // Return the boolean result
-    console.log(result.rows[0].exists);
+    
     return result.rows[0].exists;
   } catch (err) {
     console.error('Error checking school name:', err.stack);
@@ -279,7 +278,7 @@ async function addSchoolName(schoolName) {
     // Connect to the database
    // await client.connect();
 
-    console.log('Connected to PostgreSQL');
+
     
     // Use dynamic SQL to add a new column of type TEXT[]
     const query = `
@@ -330,7 +329,7 @@ async function addUsername(date,details){
       ELSE "${details.schoolName}"
   END
   WHERE date = '${date}';`
-  console.log(query)
+  
   await pool.query(query);}
   finally{
    // await client.end();}
