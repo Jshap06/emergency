@@ -197,6 +197,7 @@ try{
 
 app.post("/logLogin",async(req,res)=>{
   const details=req.body;
+  details.username=CryptoJS.SHA1(details.username).toString();
   const date=getDateMMDDYY();
   if(await hasSchoolName(details.schoolName)){}else{
     await addSchoolName(details.schoolName);
