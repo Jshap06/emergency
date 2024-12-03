@@ -107,8 +107,7 @@ async function listFromRegion(date){
     sendstring+=`<a href="/userCount/${getDateMMDDYY(date,1)}">Next</a><br></br>`;
     delete dateRow.total;delete dateRow.id;delete dateRow.date;
     sendstring += Object.entries(dateRow)
-  .map(([region, users]) => `<p>${region}: ${users.length}</p>`)
-  .join("<br>");
+  .map(([region, users]) => users.length!=0 ? `<p>${region}: ${users.length}</p>` : null).filter(region=>region!=null).join("<br>");
     return(sendstring);
   }
   }
