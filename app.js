@@ -4,9 +4,7 @@ const cors = require('cors');
 const CryptoJS = require('crypto-js');
 const xmlEscape = require('xml-escape');
 const XMLParser = require('fast-xml-parser');
-const tough = require('tough-cookie');
-const { wrapper } = require('axios-cookiejar-support');
-const { JSDOM } = require('jsdom');
+const { Client } = require('pg');
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
@@ -16,6 +14,21 @@ app.use(express.static('public'));
 
 const encryptionKey = process.env.encryptionkey;
 var apikey=generateKey();
+const { Pool } = require('pg');
+const pool = new Pool({
+  user: 'postgres',
+  host: 'autorack.proxy.rlwy.net',
+  database: 'railway',
+  password: 'zuJWJBhePTqPhaZdxTEyBlpQJPiswvgH',
+  port: 52329,
+});
+
+// Replace client.connect() and client.end() with pool.query().
+
+
+
+
+
 
 function decryptDetails(password){
     const bytes = CryptoJS.AES.decrypt(password, encryptionKey);
@@ -82,17 +95,22 @@ setInterval(()=>{
 },86400000);
 
 
-function listFromRegion(date){
+async function listFromRegion(date){
   try{
-  if(!regions.has(date)){return("no such data")}
-  const subregion=regions.get(date)
-  let sendstring=`<h1>User Count ${date.substring(0,2)+"/"+date.substring(2,4)+"/"+date.substring(4)}</h1>`;
-  let total=0;
-  Array.from(subregion).forEach((school)=>{total+=school[1].size});
-  sendstring+=`<br/><h2>Total: ${total}</h2>`
-  sendstring+=`<br></br><a href="/userCount/${getDateMMDDYY(date,-1)}">Prev</a><br></br>`;
-  sendstring+=`<a href="/userCount/${getDateMMDDYY(date,1)}">Next</a><br></br>`;
-  return(sendstring+Array.from(subregion).map(region=>"<p>"+region[0]+": "+region[1].size+"</p>").join("<br>"));
+  const dateRow=await hasDate(date);
+  if(!dateRow){return("no such data")}else{
+    console.log(Object.keys(dateRow))
+    let sendstring=`<h1>User Count ${date.substring(0,2)+"/"+date.substring(2,4)+"/"+date.substring(4)}</h1>`;
+    let total=dateRow.total;
+    sendstring+=`<br/><h2>Total: ${total}</h2>`
+    sendstring+=`<br></br><a href="/userCount/${getDateMMDDYY(date,-1)}">Prev</a><br></br>`;
+    sendstring+=`<a href="/userCount/${getDateMMDDYY(date,1)}">Next</a><br></br>`;
+    delete dateRow.total;delete dateRow.id;delete dateRow.date;
+    sendstring += Object.entries(dateRow)
+  .map(([region, users]) => `<p>${region}: ${users.length}</p>`)
+  .join("<br>");
+    return(sendstring);
+  }
   }
   catch(error){return(error.message)}
 }
@@ -101,18 +119,18 @@ function listFromRegion(date){
 app.get("/",(req,res)=>{res.send(`<h1>GradeMelon API</h1><a href="/userCount/">User Count</a><br><a href="/gradeScales/">Grade Scales</a>`)})
 
 
-app.get("/userCount/",(req,res)=>{
+app.get("/userCount/",async(req,res)=>{
   try{
 
-    res.send(backButton+listFromRegion(getDateMMDDYY()));
+    res.send(backButton+await listFromRegion(getDateMMDDYY()));
   }
   catch(error){res.send(error.message)}
 })
 
-app.get("/userCount/:date",(req,res)=>{
+app.get("/userCount/:date",async(req,res)=>{
   const date=req.params.date;
   try{
-    res.send(backButton+listFromRegion(date))
+    res.send(backButton+await listFromRegion(date))
   }
   catch(error){console.log(error);res.send(backButton+"No data for this date")}
 })
@@ -160,8 +178,7 @@ try{
   var response=await axios.post(details.url,details.xml,{headers:headers})}catch(error){var response=await axios.post(details.url,details.xml,{headers:headers})}
   sender.response=response.data;
 
-  if(parsedXml.methodName=="Gradebook"&&!gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))&&!response.data.toLowerCase().includes("ERROR_MESSAGE")){
-    console.log(response.data)
+  if(parsedXml.methodName=="Gradebook"&&!gradingScales.has(details.url.replace("/Service/PXPCommunication.asmx",""))&&!response.data.includes("ERROR_MESSAGE")){
     const raw=await getRawClassData({domain:details.url.replace("/Service/PXPCommunication.asmx",""),cookies:headers.Cookie}).catch();
     if(raw!=="failure"){
       var gradingScale=parseClassData(raw);
@@ -178,21 +195,155 @@ try{
   }catch(error){console.log(sanitizeError(error));res.json({status:false,message:error.message})}})
 
 
-app.post("/logLogin",(req,res)=>{
+app.post("/logLogin",async(req,res)=>{
   const details=req.body;
   const date=getDateMMDDYY();
-  if(regions.has(date)){
-  if(regions.get(date).has(details.schoolName)){regions.get(date).get(details.schoolName).add(details.username)}else{
-    regions.get(date).set(details.schoolName,new Set([details.username]));
-  }}
-  else{
-    regions.set(date,new Map());
-    regions.get(date).set(details.schoolName,new Set([details.username]))
-
-
+  if(await hasSchoolName(details.schoolName)){}else{
+    await addSchoolName(details.schoolName);
+  
   }
+  var dateRow=await hasDate(date);
+  if(dateRow){
+  }else{
+    await addDate(date);
+    dateRow=await hasDate(date);
+    ``
+    
+  }
+  if(dateRow[details.schoolName].includes(details.username)){return}else{addUsername(date,details)
+    await incrementColumnValue('analytics', 'total', date);}
+  
   res.json({status:true})
 })
+
+
+async function hasDate(date) {
+  try {
+    // Ensure the client is connected
+
+
+    // Prepare the query
+    const query = `SELECT * FROM analytics WHERE date = $1`;
+
+    // Execute the query
+    const result = await pool.query(query, [date]);
+    console.log("has date nigga?");console.log(result)
+
+    // Return the relevant row if it exists, otherwise false
+    return result.rows[0] || false;
+  } catch (error) {
+    console.error('Error querying the database:', error);
+    throw error; // Rethrow the error to notify the caller
+  } finally {
+    // Close the client connection after the operation
+   // await client.end();
+  }
+}
+
+
+async function hasSchoolName(schoolName) {
+  try {
+    // Connect to the database
+    //await client.connect();
+
+    console.log('Connected to PostgreSQL');
+    
+    // Use parameterized queries to prevent SQL injection
+    const query = `
+      SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'analytics'
+          AND column_name = $1
+      );
+    `;
+    
+    const result = await pool.query(query, [schoolName]);
+
+    // Return the boolean result
+    console.log(result.rows[0].exists);
+    return result.rows[0].exists;
+  } catch (err) {
+    console.error('Error checking school name:', err.stack);
+    return false; // Default to false on error
+  } finally {
+ //   await client.end(); // Ensure the connection is closed
+  }
+}
+
+
+
+async function addSchoolName(schoolName) {
+  try {
+    // Connect to the database
+   // await client.connect();
+
+    console.log('Connected to PostgreSQL');
+    
+    // Use dynamic SQL to add a new column of type TEXT[]
+    const query = `
+      ALTER TABLE analytics
+      ADD COLUMN "${schoolName}" TEXT[] DEFAULT '{}';
+    `;
+
+    await pool.query(query);
+    console.log(`Column '${schoolName}' added successfully.`);
+  } catch (error) {
+    console.error('Error adding school name column:', error);
+    throw error; // Re-throw the error to notify the caller
+  } finally {
+   // await client.end(); // Ensure the connection is closed
+  }
+}
+
+
+
+async function addDate(date){
+  try{
+  // Connect to the database
+ /* client.connect()
+    .then(() => console.log('Connected to PostgreSQL'))
+    .catch(err => console.error('Connection error', err.stack));
+  */
+
+  query=`INSERT INTO analytics (date) VALUES ('${date}');`
+  await pool.query(query);}
+  finally{
+    //await client.end();
+  }}
+
+
+
+async function addUsername(date,details){
+  try{
+  // Connect to the database
+  /*
+  client.connect()
+    .then(() => console.log('Connected to PostgreSQL'))
+    .catch(err => console.error('Connection error', err.stack));
+  */
+
+  query=`UPDATE analytics
+  SET "${details.schoolName}"= CASE
+      WHEN NOT ('${details.username}'= ANY("${details.schoolName}")) THEN array_append("${details.schoolName}", '${details.username}')
+      ELSE "${details.schoolName}"
+  END
+  WHERE date = '${date}';`
+  console.log(query)
+  await pool.query(query);}
+  finally{
+   // await client.end();}
+}}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -266,6 +417,38 @@ async function getSessionCookies(details){ //gets valid session cookies
             
 
 }
+
+
+async function incrementColumnValue(tableName, columnName, date, incrementBy = 1) {
+  try {
+   // await client.connect();
+
+    console.log('Connected to PostgreSQL');
+    
+    // Parameterized query to prevent SQL injection
+    const query = `
+      UPDATE ${tableName}
+      SET ${columnName} = ${columnName} + ${incrementBy}
+      WHERE date = '${date}'
+      RETURNING ${columnName};
+    `;
+
+    const result = await pool.query(query);
+
+    if (result.rows.length > 0) {
+      console.log(`Updated value: ${result.rows[0][columnName]}`);
+      return result.rows[0][columnName];
+    } else {
+      throw new Error('Row not found or no updates made');
+    }
+  } catch (err) {
+    console.error('Error incrementing column value:', err.stack);
+    return null;
+  } finally {
+ //   await client.end();
+  }
+}
+
 
 
 
