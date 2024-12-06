@@ -54,8 +54,6 @@ function generateKey() {
     let keyBytes = CryptoJS.enc.Utf8.parse('b2524efb438b4532b322e633d5aff252');  // Convert key to a word array
     let ivBytes = CryptoJS.enc.Utf8.parse('AES');  // Convert IV to a word array
 
-    console.log("Key Bytes: ", keyBytes);
-    console.log("IV Bytes: ", ivBytes);
 
     // Define the input string (date, version, etc.)
     const today = getDateMMDDYY();
@@ -350,7 +348,6 @@ async function addDate(date){
   try{
   // Connect to the database
  /* client.connect()
-    .then(() => console.log('Connected to PostgreSQL'))
     .catch(err => console.error('Connection error', err.stack));
   */
 
@@ -369,7 +366,6 @@ async function addUsername(date,details){
   // Connect to the database
   /*
   client.connect()
-    .then(() => console.log('Connected to PostgreSQL'))
     .catch(err => console.error('Connection error', err.stack));
   */
 
@@ -443,9 +439,7 @@ function parseClassData(data){
   })
   if(index==undefined){return null}
   data[index].details.forEach(grade=>{
-    console.log(grade)
       if(grade.lowScore>=0&&grade.highScore>=0){
-        console.log("bullshit")
         gradeScale[grade.score]=[grade.lowScore,grade.highScore];
 
   }});
@@ -473,7 +467,6 @@ async function incrementColumnValue(tableName, columnName, date, incrementBy = 1
   try {
    // await client.connect();
 
-    console.log('Connected to PostgreSQL');
     
     // Parameterized query to prevent SQL injection
     const query = `
@@ -486,7 +479,6 @@ async function incrementColumnValue(tableName, columnName, date, incrementBy = 1
     const result = await pool.query(query);
 
     if (result.rows.length > 0) {
-      console.log(`Updated value: ${result.rows[0][columnName]}`);
       return result.rows[0][columnName];
     } else {
       throw new Error('Row not found or no updates made');
@@ -536,7 +528,6 @@ async function getTotalUniqueUsers(limit=0){
   
       }
       const dailyPercentages=dailyTotals.map((total,index)=>((total/fullTotals[index])*100).toFixed(2));
-      console.log(dailyPercentages);
       if(!includeCurrentDay){
           dailyPercentages.pop();
       }
