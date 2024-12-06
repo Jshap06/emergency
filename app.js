@@ -152,6 +152,16 @@ app.get("/userCount/:date",async(req,res)=>{
     catch(error){res.send(backButton+error.message)}
 
   }
+  else if(date=="percentLogins"){
+    try{
+      const percentages=await getDailyLoginPercent();
+      percentages.map((percent,index)=>(`<p>Day ${index+1}: ${percent}% of users logged in</p>`)).join("<br>");
+      res.send(backButton+percentages);
+      }catch(error){res.send(backButton+error.message)}
+    
+
+  }
+
   else{
   try{
     res.send(backButton+await listFromDate(date))
@@ -163,14 +173,6 @@ app.get("/userCount/:date",async(req,res)=>{
 
 
 
- app.get("/userCount/percentLogins",async(req,res)=>{
-  try{
-  const percentages=await getDailyLoginPercent();
-  percentages.map((percent,index)=>(`<p>Day ${index+1}: ${percent}% of users logged in</p>`)).join("<br>");
-  res.send(backButton+percentages);
-  }catch(error){res.send(backButton+error.message)}
-
- })
 
 
 app.get("/gradeScales/",(req,res)=>{
