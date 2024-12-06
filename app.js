@@ -4,7 +4,8 @@ const cors = require('cors');
 const CryptoJS = require('crypto-js');
 const xmlEscape = require('xml-escape');
 const XMLParser = require('fast-xml-parser');
-const { Client } = require('pg');
+const { Pool } = require('pg');
+
 
 const app = express();
 app.use(express.json()); // Parse incoming JSON requests
@@ -14,7 +15,7 @@ app.use(express.static('public'));
 
 const encryptionKey = process.env.encryptionkey;
 var apikey=generateKey();
-const { Pool } = require('pg');
+
 const pool = new Pool({
   user: 'postgres',
   host: 'autorack.proxy.rlwy.net',
@@ -95,19 +96,30 @@ setInterval(()=>{
 },86400000);
 
 
-async function listFromRegion(date){
+
+function listFromRow(row){
+  delete row.total;delete row.id;delete row.date;
+  return Object.entries(row)
+  .map(([region, users]) => users.length!=0 ? `<p>${region}: ${users.length}</p>` : null).filter(region=>region!=null).join("<br>");
+
+}
+
+function formatDate(date){
+  return date.substring(0,2)+"/"+date.substring(2,4)+"/"+date.substring(4)
+}
+
+
+async function listFromDate(date){
   try{
   const dateRow=await hasDate(date);
   if(!dateRow){return("no such data")}else{
     console.log(Object.keys(dateRow))
-    let sendstring=`<h1>User Count ${date.substring(0,2)+"/"+date.substring(2,4)+"/"+date.substring(4)}</h1>`;
+    let sendstring=`<h1>User Count ${formatDate(date)}</h1>`;
     let total=dateRow.total;
     sendstring+=`<br/><h2>Total: ${total}</h2>`
     sendstring+=`<br></br><a href="/userCount/${getDateMMDDYY(date,-1)}">Prev</a><br></br>`;
     sendstring+=`<a href="/userCount/${getDateMMDDYY(date,1)}">Next</a><br></br>`;
-    delete dateRow.total;delete dateRow.id;delete dateRow.date;
-    sendstring += Object.entries(dateRow)
-  .map(([region, users]) => users.length!=0 ? `<p>${region}: ${users.length}</p>` : null).filter(region=>region!=null).join("<br>");
+    sendstring +=listFromRow(dateRow);
     return(sendstring);
   }
   }
@@ -115,13 +127,13 @@ async function listFromRegion(date){
 }
 
 
-app.get("/",(req,res)=>{res.send(`<h1>GradeMelon API</h1><a href="/userCount/">User Count</a><br><a href="/gradeScales/">Grade Scales</a>`)})
+app.get("/",(req,res)=>{res.send(`<h1>GradeMelon API</h1><a href="/userCount/">User Count</a><br><a href="/gradeScales/">Grade Scales</a><br><a href="/userCount/all">Total Unique Users</a><br><a href="/userCount/percentLogins">Daily Login Percentages</a>`)})
 
 
 app.get("/userCount/",async(req,res)=>{
   try{
 
-    res.send(backButton+await listFromRegion(getDateMMDDYY()));
+    res.send(backButton+await listFromDate(getDateMMDDYY()));
   }
   catch(error){res.send(error.message)}
 })
@@ -129,11 +141,32 @@ app.get("/userCount/",async(req,res)=>{
 app.get("/userCount/:date",async(req,res)=>{
   const date=req.params.date;
   try{
-    res.send(backButton+await listFromRegion(date))
+    res.send(backButton+await listFromDate(date))
   }
   catch(error){console.log(error);res.send(backButton+"No data for this date")}
 })
 
+
+ app.get("/userCount/all",async(req,res)=>{
+  try{
+    const master=await getTotalUniqueUsers();
+    const dates=await pool.query('SELECT Date FROM analytics ORDER BY CAST(Date as INTEGER);');
+    const dateList=dates.rows.map(row=>row.date);
+    sendstring=`<h1>Total Unique User Count</h1><h2>from ${formatDate(dateList[0])} to ${formatDate(dateList[dateList.length-1])}</h2><br></br>`;
+    sendstring+=listFromRow(master);
+    res.send(backButton+sendstring);
+  }
+  catch(error){res.send(backButton+error.message)}
+ })
+
+ app.get("/userCount/percentLogins",async(req,res)=>{
+  try{
+  const percentages=await getDailyLoginPercent();
+  percentages.map((percent,index)=>(`<p>Day ${index+1}: ${percent}% of users logged in</p>`)).join("<br>");
+  res.send(backButton+percentages);
+  }catch(error){res.send(backButton+error.message)}
+
+ })
 
 
 app.get("/gradeScales/",(req,res)=>{
@@ -195,6 +228,7 @@ try{
 
 
 app.post("/logLogin",async(req,res)=>{
+  try{
   const details=req.body;
   details.username=CryptoJS.SHA1(details.username).toString();
   const date=getDateMMDDYY();
@@ -214,8 +248,13 @@ app.post("/logLogin",async(req,res)=>{
     await incrementColumnValue('analytics', 'total', date);}
   
   res.json({status:true})
+  }catch(error){console.log(sanitizeError(error));res.json({status:false})}
 })
 
+function sanitizeIdentifier(identifier) {
+  // Allow only alphanumeric characters and underscores
+  return identifier.replace(/[^a-zA-Z0-9_]/g, '');
+}
 
 async function hasDate(date) {
   try {
@@ -274,6 +313,7 @@ async function hasSchoolName(schoolName) {
 
 async function addSchoolName(schoolName) {
   try {
+    schoolName=sanitizeIdentifier(schoolName);
     // Connect to the database
    // await client.connect();
 
@@ -315,6 +355,8 @@ async function addDate(date){
 
 async function addUsername(date,details){
   try{
+    details.schoolName=sanitizeIdentifier(details.schoolName);
+    details.username=sanitizeIdentifier(details.username);
   // Connect to the database
   /*
   client.connect()
@@ -448,6 +490,48 @@ async function incrementColumnValue(tableName, columnName, date, incrementBy = 1
   }
 }
 
+
+
+async function getTotalUniqueUsers(limit=0){
+  const result = await pool.query('SELECT * FROM analytics ORDER BY CAST(Date as INTEGER);');
+  const master={};
+  result.rows.forEach(row=>{delete row.date;delete row.total;});
+  for(let i=0;i<Object.keys(result.rows[0]).length;i++){
+      const key=Object.keys(result.rows[0])[i];
+      master[key]=[];
+  
+      for(let i=0;i<(limit ? limit : result.rows.length);i++){
+          master[key].push(...result.rows[i][key]);
+      }
+      
+  }
+  
+  for(let key in master){
+      const unique=new Set(master[key]);
+      master[key]=unique.size;
+      
+  }
+  master.total=Object.values(master).reduce((acc,curr)=>acc+curr);
+  return master;
+  }
+  
+  
+  async function getDailyLoginPercent(includeCurrentDay=false){
+      const result=await pool.query('SELECT * FROM analytics ORDER BY CAST(Date as INTEGER);');
+      const dailyTotals=result.rows.map(row=>row.total)
+      const fullTotals=[];
+      for(let index=0;index<dailyTotals.length;index++){
+          const total=await getTotalUniqueUsers(index+1);
+          fullTotals.push(total.total);
+  
+      }
+      const dailyPercentages=dailyTotals.map((total,index)=>((total/fullTotals[index])*100).toFixed(2));
+      if(!includeCurrentDay){
+          dailyPercentages.pop();
+      }
+      return dailyPercentages;
+  
+  }
 
 
 
