@@ -146,7 +146,7 @@ app.get("/userCount/:date",async(req,res)=>{
       const dates=await pool.query('SELECT Date FROM analytics ORDER BY CAST(Date as INTEGER);');
       const dateList=dates.rows.map(row=>row.date);
       sendstring=`<h1>Total Unique User Count</h1><h2>from ${formatDate(dateList[0])} to ${formatDate(dateList[dateList.length-1])}</h2><br></br>`;
-      sendstring+=`<br/><h2>Total: ${master.total}</h2>`
+      sendstring+=`<h2>Total: ${master.total}</h2>`
       sendstring+=listFromRow(master);
       res.send(backButton+sendstring);
     }
