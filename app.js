@@ -260,8 +260,8 @@ app.post("/logLogin",async(req,res)=>{
 })
 
 function sanitizeIdentifier(identifier) {
-  // Allow only alphanumeric characters and underscores
-  return identifier.replace(/[^a-zA-Z0-9_]/g, '');
+  // Allow only alphanumeric characters, underscores, and spaces
+  return identifier.replace(/[^a-zA-Z0-9_ ]/g, '');
 }
 
 async function hasDate(date) {
