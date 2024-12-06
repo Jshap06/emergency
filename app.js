@@ -514,7 +514,7 @@ async function getTotalUniqueUsers(limit=0){
   
   for(let key in master){
       const unique=new Set(master[key]);
-      master[key]=unique.size;
+      master[key]=Array.from(unique);
       
   }
   master.total=Object.values(master).reduce((acc,curr)=>acc+curr);
