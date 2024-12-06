@@ -155,8 +155,10 @@ app.get("/userCount/:date",async(req,res)=>{
   }
   else if(date=="percentLogins"){
     try{
-      const percentages=await getDailyLoginPercent();
-      res.send(backButton+percentages.map((percent,index)=>(`<p>Day ${index+1}: ${percent}% of users logged in</p>`)).join("<br>"));
+      const result=await getDailyLoginPercent();
+      const percentages=result[0];
+      const dates=result[1];
+      res.send(backButton+percentages.map((percent,index)=>(`<p>Day ${formDate(dates[index])}: ${percent}% of users logged in</p>`)).join("<br>"));
       }catch(error){res.send(backButton+error.message)}
     
 
@@ -525,6 +527,7 @@ async function getTotalUniqueUsers(limit=0){
   async function getDailyLoginPercent(includeCurrentDay=false){
       const result=await pool.query('SELECT * FROM analytics ORDER BY CAST(Date as INTEGER);');
       const dailyTotals=result.rows.map(row=>row.total)
+      const dates=result.rows.map(row=>row.date);
       const fullTotals=[];
       for(let index=0;index<dailyTotals.length;index++){
           const total=await getTotalUniqueUsers(index+1);
@@ -536,7 +539,7 @@ async function getTotalUniqueUsers(limit=0){
       if(!includeCurrentDay){
           dailyPercentages.pop();
       }
-      return dailyPercentages;
+      return [dailyPercentages,dates];
   
   }
 
