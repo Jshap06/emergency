@@ -158,7 +158,7 @@ app.get("/userCount/:date",async(req,res)=>{
       const result=await getDailyLoginPercent();
       const percentages=result[0];
       const dates=result[1];
-      res.send(backButton+percentages.map((percent,index)=>(`<p>Day ${formDate(dates[index])}: ${percent}% of users logged in</p>`)).join("<br>"));
+      res.send(backButton+percentages.map((percent,index)=>(`<p>Day ${formatDate(dates[index])}: ${percent}% of users logged in</p>`)).join("<br>"));
       }catch(error){res.send(backButton+error.message)}
     
 
