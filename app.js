@@ -155,8 +155,7 @@ app.get("/userCount/:date",async(req,res)=>{
   else if(date=="percentLogins"){
     try{
       const percentages=await getDailyLoginPercent();
-      percentages.map((percent,index)=>(`<p>Day ${index+1}: ${percent}% of users logged in</p>`)).join("<br>");
-      res.send(backButton+percentages);
+      res.send(backButton+percentages.map((percent,index)=>(`<p>Day ${index+1}: ${percent}% of users logged in</p>`)).join("<br>"));
       }catch(error){res.send(backButton+error.message)}
     
 
