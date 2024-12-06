@@ -140,24 +140,28 @@ app.get("/userCount/",async(req,res)=>{
 
 app.get("/userCount/:date",async(req,res)=>{
   const date=req.params.date;
+  if(date=="all"){
+    try{
+      const master=await getTotalUniqueUsers();
+      const dates=await pool.query('SELECT Date FROM analytics ORDER BY CAST(Date as INTEGER);');
+      const dateList=dates.rows.map(row=>row.date);
+      sendstring=`<h1>Total Unique User Count</h1><h2>from ${formatDate(dateList[0])} to ${formatDate(dateList[dateList.length-1])}</h2><br></br>`;
+      sendstring+=listFromRow(master);
+      res.send(backButton+sendstring);
+    }
+    catch(error){res.send(backButton+error.message)}
+
+  }
+  else{
   try{
     res.send(backButton+await listFromDate(date))
   }
   catch(error){console.log(error);res.send(backButton+"No data for this date")}
+}
 })
 
 
- app.get("/userCount/all",async(req,res)=>{
-  try{
-    const master=await getTotalUniqueUsers();
-    const dates=await pool.query('SELECT Date FROM analytics ORDER BY CAST(Date as INTEGER);');
-    const dateList=dates.rows.map(row=>row.date);
-    sendstring=`<h1>Total Unique User Count</h1><h2>from ${formatDate(dateList[0])} to ${formatDate(dateList[dateList.length-1])}</h2><br></br>`;
-    sendstring+=listFromRow(master);
-    res.send(backButton+sendstring);
-  }
-  catch(error){res.send(backButton+error.message)}
- })
+
 
  app.get("/userCount/percentLogins",async(req,res)=>{
   try{
