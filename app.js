@@ -517,7 +517,7 @@ async function getTotalUniqueUsers(limit=0){
       master[key]=Array.from(unique);
       
   }
-  master.total=Object.values(master).reduce((acc,curr)=>acc+curr.length);
+  master.total=Object.values(master).reduce((acc,curr)=>acc+curr.length,0);
   return master;
   }
   
@@ -532,6 +532,7 @@ async function getTotalUniqueUsers(limit=0){
   
       }
       const dailyPercentages=dailyTotals.map((total,index)=>((total/fullTotals[index])*100).toFixed(2));
+      console.log(dailyPercentages);
       if(!includeCurrentDay){
           dailyPercentages.pop();
       }
