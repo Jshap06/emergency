@@ -113,7 +113,6 @@ async function listFromDate(date){
   try{
   const dateRow=await hasDate(date);
   if(!dateRow){return("no such data")}else{
-    console.log(Object.keys(dateRow))
     let sendstring=`<h1>User Count ${formatDate(date)}</h1>`;
     let total=dateRow.total;
     sendstring+=`<br/><h2>Total: ${total}</h2>`
