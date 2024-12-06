@@ -261,7 +261,8 @@ app.post("/logLogin",async(req,res)=>{
 
 function sanitizeIdentifier(identifier) {
   // Allow only alphanumeric characters, underscores, spaces, and hyphens
-  return identifier.replace(/[^a-zA-Z0-9_ \-]/g, '');
+  //return identifier.replace(/[^a-zA-Z0-9_ \-]/g, '');
+return identifier
 }
 
 
