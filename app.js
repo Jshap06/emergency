@@ -452,7 +452,7 @@ function parseClassData(data){
 
 
 async function getSessionCookies(details){ //gets valid session cookies
-       url="https://md-mcps-psv.edupoint.com/PXP2_Login.aspx";
+       url=details.domain;
       const response = await axios.get(url,{withCredentials:true}).catch(error=>{console.log("sessionCookies Fail");console.log(error);return "failure"});
       var cookies=response.headers['set-cookie'];
       var cookiestring="";
