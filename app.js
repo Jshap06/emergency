@@ -242,6 +242,7 @@ app.post("/logLogin",async(req,res)=>{
   
   }
   var dateRow=await hasDate(date);
+  console.log(dateRow);
   if(dateRow){
   }else{
     await addDate(date);
