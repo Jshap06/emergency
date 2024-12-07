@@ -246,7 +246,7 @@ app.post("/logLogin",async(req,res)=>{
   }else{
     await addDate(date);
     dateRow=await hasDate(date);
-    ``
+    
     
   }
   if(dateRow[details.schoolName].includes(details.username)){return}else{addUsername(date,details)
