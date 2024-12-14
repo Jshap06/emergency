@@ -19,7 +19,7 @@ const pool = new Pool({
 
 const app=express(express.json());
 
-
+app.options('*', cors()); //{origin:"https://grademelon.org"}
 app.use(cors());
 
 app.get('/getEvents', async (req, res) => {
