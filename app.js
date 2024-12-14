@@ -10,7 +10,7 @@ const pool = new Pool({
   host: 'autorack.proxy.rlwy.net',
   database: 'railway',
   password: 'YagjEpbJqKUOmAvaUYmcwYpqKBWJGkLa',
-  port: 52329,
+  port: 25125,
 });
 
 
