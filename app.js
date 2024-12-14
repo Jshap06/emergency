@@ -41,7 +41,7 @@ app.get('/getEvents', async (req, res) => {
   
   async function getEvents(){
     const query='SELECT * FROM gamblingEvents';
-    const result = await pool.querey(query);
+    const result = await pool.query(query);
     return result.rows;
   }
 
