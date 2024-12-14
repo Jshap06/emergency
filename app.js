@@ -30,6 +30,24 @@ app.use((req, res, next) => {
 });
 
 
+app.get('/getEvents', async (req, res) => {
+  try{
+    console.log("fuck fuck fuck")
+    const events = await getEvents();
+    res.json({status:true,events:events});
+  
+  }
+  catch{res.json({status:false})}
+  
+  
+  });
+  
+  async function getEvents(){
+    const query='SELECT * FROM gamblingEvents';
+    const result = await pool.querey(query);
+    return result.rows;
+  }
+
 
 
 app.get('/', async (req, res) => {
