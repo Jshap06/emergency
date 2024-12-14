@@ -1,9 +1,6 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-const CryptoJS = require('crypto-js');
-const xmlEscape = require('xml-escape');
-const XMLParser = require('fast-xml-parser');
 const { Pool } = require('pg');
 const e = require('express');
 
@@ -37,7 +34,7 @@ app.get('/getEvents', async (req, res) => {
     res.json({status:true,events:events});
   
   }
-  catch{res.json({status:false})}
+  catch(e){res.json({status:false,message:e.message})}
   
   
   });
