@@ -17,7 +17,7 @@ const pool = new Pool({
 });
 
 
-const app=express();
+const app=express(express.json());
 
 
 app.use(cors());
