@@ -24,6 +24,7 @@ app.use(cors());
 
 app.get('/getEvents', async (req, res) => {
 try{
+  console.log("fuck fuck fuck")
   const events = await getEvents();
   res.json({status:true,events:events});
 
