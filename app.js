@@ -19,8 +19,18 @@ const pool = new Pool({
 
 const app=express(express.json());
 
-app.options('*', cors({origin:"https://localhost"})); //{origin:"https://grademelon.org"}
-app.use(cors({origin:"https://localhost"}));
+app.use(cors({ origin: '*' }));
+
+// Or use a simple middleware function
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  next();
+});
+
+
+
 
 app.get('/getEvents', async (req, res) => {
 try{
